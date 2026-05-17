@@ -156,13 +156,6 @@ export default function HomePage({ onSelectProgram, onSelectDivision }) {
           </div>
         </div>
 
-        {/* ── Breather strip ── */}
-        <div className="lp-breather">
-          <div className="lp-breather-rule" />
-          <span className="lp-breather-label">FY 2025-26 · All Divisions · NHM Arunachal Pradesh</span>
-          <div className="lp-breather-rule" />
-        </div>
-
         {/* ── Five-column grid ── */}
         <div className="home-grid lp-grid">
           {DIVISIONS.map(div => {

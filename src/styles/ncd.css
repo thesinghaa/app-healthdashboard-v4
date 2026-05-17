@@ -3526,73 +3526,54 @@
 }
 
 
+
 /* ══════════════════════════════════════════════════════════════════
    LANDING PAGE — 5-column no-scroll grid
    ══════════════════════════════════════════════════════════════════ */
 
-/* ── Grid container (extends .home-grid) ───────────────────────── */
+/* ── Grid container ─────────────────────────────────────────────── */
 .lp-grid {
   display: flex;
-  gap: 10px;
-  padding: 0 14px 16px;
+  gap: 12px;
+  padding: 12px !important;
   align-items: stretch;
 }
 
-/* ── Breather strip ─────────────────────────────────────────────── */
-.lp-breather {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 6px 28px;
-  flex-shrink: 0;
-  margin: 0;
-}
-.lp-breather-rule {
-  flex: 1;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255,85,0,0.35), transparent);
-}
-.lp-breather-label {
-  font-size: 9.5px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: #FF5500;
-  padding: 4px 14px;
-  border: 1px solid rgba(255,85,0,0.35);
-  border-radius: 20px;
-  background: rgba(255,85,0,0.05);
-  white-space: nowrap;
-}
-
-/* ── Division cards ─────────────────────────────────────────────── */
+/* ── Division cards — 3D orange bento style ─────────────────────── */
 .lp-card {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  border-radius: 16px;
-  background: rgba(255, 252, 248, 0.78);
-  backdrop-filter: blur(20px) saturate(160%);
-  -webkit-backdrop-filter: blur(20px) saturate(160%);
-  border: 1.5px solid rgba(255, 200, 160, 0.28);
-  border-top: 3px solid var(--accent, #E8500A);
+  border-radius: 20px;
+  background: rgba(255, 252, 248, 0.84);
+  backdrop-filter: blur(32px) saturate(175%);
+  -webkit-backdrop-filter: blur(32px) saturate(175%);
+  border: 4px solid #FF5500;
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.92),
-    0 2px 8px rgba(26,16,8,0.06),
-    0 8px 28px rgba(26,16,8,0.09),
-    0 0 0 0.5px rgba(255,120,50,0.08);
-  transition: box-shadow 0.2s, transform 0.2s;
+    inset 0 2px 0 rgba(255,255,255,0.95),
+    inset 1px 0 0 rgba(255,255,255,0.42),
+    inset -1px 0 0 rgba(255,255,255,0.22),
+    inset 0 -2px 0 rgba(255,85,0,0.14),
+    0 2px 4px rgba(26,22,16,0.08),
+    0 10px 28px rgba(26,22,16,0.11),
+    0 32px 72px rgba(26,22,16,0.09),
+    0 4px 32px rgba(255,85,0,0.18);
+  transition: box-shadow 0.20s ease, transform 0.20s ease;
 }
 .lp-card:hover {
+  transform: translateY(-2px);
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.92),
-    0 4px 16px rgba(26,16,8,0.10),
-    0 16px 40px rgba(26,16,8,0.13),
-    0 0 24px rgba(255,85,0,0.10);
-  transform: translateY(-1px);
+    inset 0 2px 0 rgba(255,255,255,0.95),
+    inset 1px 0 0 rgba(255,255,255,0.42),
+    inset -1px 0 0 rgba(255,255,255,0.22),
+    inset 0 -2px 0 rgba(255,85,0,0.18),
+    0 4px 8px rgba(26,22,16,0.10),
+    0 16px 40px rgba(26,22,16,0.13),
+    0 40px 80px rgba(26,22,16,0.10),
+    0 8px 48px rgba(255,85,0,0.24);
 }
 
-/* Column widths — proportional to programme count + visual weight */
+/* Column widths — proportional to programme count */
 .lp-card--rch  { flex: 2.0; }
 .lp-card--ndcp { flex: 1.6; }
 .lp-card--ncd  { flex: 2.3; }
@@ -3603,7 +3584,8 @@
 .lp-card-header {
   flex-shrink: 0;
   padding: 14px 14px 11px;
-  background: var(--card-bg, rgba(232,80,10,0.04));
+  background: rgba(255, 252, 248, 0.60);
+  border-bottom: 1px solid rgba(255, 85, 0, 0.14);
 }
 .lp-card-header-row {
   display: flex;
@@ -3616,9 +3598,9 @@
   font-weight: 800;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--accent, #E8500A);
-  background: rgba(255,255,255,0.60);
-  border: 1px solid rgba(255,120,50,0.22);
+  color: #FF5500;
+  background: rgba(255,255,255,0.70);
+  border: 1px solid rgba(255,85,0,0.28);
   padding: 2px 8px;
   border-radius: 10px;
 }
@@ -3630,15 +3612,15 @@
   height: 24px;
   border-radius: 7px;
   background: rgba(255,255,255,0.55);
-  border: 1px solid rgba(255,120,50,0.20);
-  color: var(--accent, #E8500A);
+  border: 1px solid rgba(255,85,0,0.22);
+  color: #FF5500;
   cursor: pointer;
   transition: background 0.15s, transform 0.15s;
   flex-shrink: 0;
 }
 .lp-expand-btn:hover {
-  background: rgba(255,120,50,0.14);
-  transform: scale(1.1);
+  background: rgba(255,85,0,0.14);
+  transform: scale(1.12);
 }
 .lp-div-name {
   font-family: 'Playfair Display', Georgia, serif;
@@ -3671,21 +3653,21 @@
 .lp-count--yellow { background: rgba(217,119,6,0.10); color: #92400E; }
 .lp-count--green  { background: rgba(22,163,74,0.10); color: #14532D; }
 
-/* ── Divider ────────────────────────────────────────────────────── */
+/* ── Card divider ───────────────────────────────────────────────── */
 .lp-card-divider {
   height: 1px;
-  background: linear-gradient(90deg, transparent 0%, rgba(255,120,50,0.20) 30%, rgba(255,120,50,0.20) 70%, transparent 100%);
+  background: linear-gradient(90deg, transparent, rgba(255,85,0,0.18) 30%, rgba(255,85,0,0.18) 70%, transparent);
   flex-shrink: 0;
   margin: 0 10px;
 }
 
-/* ── Programme rows ─────────────────────────────────────────────── */
+/* ── Programme rows — bento micro-tile style ────────────────────── */
 .lp-progs {
   flex: 1;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  padding: 7px 8px 8px;
+  padding: 8px;
   gap: 4px;
 }
 
@@ -3696,49 +3678,40 @@
   justify-content: space-between;
   gap: 6px;
   padding: 0 10px;
-  border-radius: 9px;
-  border: 1px solid transparent;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.80);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,85,0,0.12);
+  border-top: 2px solid rgba(255,85,0,0.28);
   cursor: pointer;
   text-align: left;
-  transition: background 0.12s, border-color 0.12s, transform 0.12s, box-shadow 0.12s;
   min-height: 0;
-  position: relative;
-  overflow: hidden;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.90),
+    inset 0 -1px 0 rgba(255,85,0,0.07),
+    0 1px 3px rgba(26,22,16,0.05),
+    0 3px 10px rgba(26,22,16,0.07),
+    0 2px 10px rgba(255,85,0,0.07);
+  transition: box-shadow 0.16s ease, transform 0.14s ease, border-color 0.14s ease, background 0.14s ease;
 }
-.lp-prog::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  transition: opacity 0.15s;
-  border-radius: inherit;
-}
-.lp-prog:hover::before { opacity: 1; }
 .lp-prog:hover {
-  transform: translateX(3px);
-  box-shadow: 0 2px 8px rgba(26,16,8,0.08);
+  background: rgba(255,255,255,0.96);
+  border-color: rgba(255,85,0,0.40);
+  border-top-color: #FF5500;
+  transform: translateY(-2px);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.98),
+    inset 0 -1px 0 rgba(255,85,0,0.12),
+    0 2px 6px rgba(26,22,16,0.08),
+    0 6px 18px rgba(26,22,16,0.10),
+    0 4px 18px rgba(255,85,0,0.14);
 }
 
-.lp-prog--red {
-  background: rgba(255,245,245,0.65);
-  border-color: rgba(220,38,38,0.12);
-}
-.lp-prog--red::before    { background: rgba(220,38,38,0.06); }
-.lp-prog--red:hover      { border-color: rgba(220,38,38,0.24); }
-
-.lp-prog--yellow {
-  background: rgba(255,251,240,0.65);
-  border-color: rgba(217,119,6,0.12);
-}
-.lp-prog--yellow::before { background: rgba(217,119,6,0.06); }
-.lp-prog--yellow:hover   { border-color: rgba(217,119,6,0.24); }
-
-.lp-prog--green {
-  background: rgba(252,249,246,0.65);
-  border-color: rgba(232,80,10,0.10);
-}
-.lp-prog--green::before  { background: rgba(232,80,10,0.05); }
-.lp-prog--green:hover    { border-color: rgba(232,80,10,0.22); }
+/* Status left-border accent */
+.lp-prog--red    { border-left-color: #DC2626; }
+.lp-prog--yellow { border-left-color: #D97706; }
+.lp-prog--green  { border-left-color: #FF5500; }
 
 .lp-prog-left {
   display: flex;
@@ -3753,9 +3726,9 @@
   border-radius: 50%;
   flex-shrink: 0;
 }
-.lp-prog-dot--red    { background: #DC2626; box-shadow: 0 0 4px rgba(220,38,38,0.45); }
-.lp-prog-dot--yellow { background: #D97706; box-shadow: 0 0 4px rgba(217,119,6,0.45); }
-.lp-prog-dot--green  { background: #16A34A; box-shadow: 0 0 4px rgba(22,163,74,0.45); }
+.lp-prog-dot--red    { background: #DC2626; box-shadow: 0 0 5px rgba(220,38,38,0.50); }
+.lp-prog-dot--yellow { background: #D97706; box-shadow: 0 0 5px rgba(217,119,6,0.50); }
+.lp-prog-dot--green  { background: #16A34A; box-shadow: 0 0 5px rgba(22,163,74,0.50); }
 
 .lp-prog-text {
   display: flex;
