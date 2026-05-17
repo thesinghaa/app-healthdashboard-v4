@@ -205,7 +205,6 @@ export default function HomePage({ onSelectProgram, onSelectDivision }) {
                       onClick={() => onSelectProgram(prog, div)}
                     >
                       <div className="lp-prog-left">
-                        <span className={`lp-prog-dot lp-prog-dot--${prog.status}`} />
                         <div className="lp-prog-text">
                           <span className="lp-prog-name">{PROG_LABEL[prog.id] || prog.name}</span>
                           {prog.keyMetric && <span className="lp-prog-metric">{prog.keyMetric}</span>}
