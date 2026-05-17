@@ -3537,7 +3537,12 @@
   gap: 12px;
   padding: 6px 14px 16px !important;
   align-items: stretch;
-  overflow: visible !important;
+  overflow: hidden !important;
+}
+
+/* Pull cards back from the grid bottom edge so the 4px border is never clipped */
+.lp-card {
+  margin-bottom: 4px;
 }
 
 /* ── Division cards — 3D orange bento style ─────────────────────── */
