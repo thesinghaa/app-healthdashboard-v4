@@ -81,11 +81,52 @@ const PROG_LABEL = {
   'pm-abhim':          'PM-ABHIM',
 };
 
+const PROG_ALIASES = {
+  'maternal-health':   ['mh', 'anc', 'mmr', 'rch', 'maternal'],
+  'jsy':               ['janani suraksha', 'cash transfer', 'institutional delivery'],
+  'cac':               ['abortion', 'contraception'],
+  'pcpndt':            ['sex ratio', 'srb', 'gender'],
+  'child-health':      ['rbsk', 'imr', 'child', 'newborn', 'sncu'],
+  'immunization':      ['uip', 'vaccine', 'vaccination', 'bcg', 'pentavalent'],
+  'adolescent-health': ['rksk', 'adolescent', 'sabla', 'kishori'],
+  'family-planning':   ['fp', 'contraceptive', 'sterilisation', 'iucd', 'ppiucd'],
+  'nutrition':         ['poshan', 'anaemia', 'stunting', 'wasting', 'ifa'],
+  'nvhcp':             ['vector', 'endemic', 'kala azar', 'visceral'],
+  'tb':                ['ntep', 'tuberculosis', 'tb mukt', 'nikshay', 'dots'],
+  'nlep':              ['leprosy', 'hansen'],
+  'ncvbdcp':           ['malaria', 'dengue', 'chikungunya', 'filaria', 'snv'],
+  'idsp':              ['surveillance', 'disease', 'outbreak'],
+  'nscaem':            ['sickle cell', 'blood cell', 'thalassemia'],
+  'np-ncd':            ['ncd', 'non communicable', 'hypertension', 'htn'],
+  'pmndp':             ['diabetes', 'blood sugar', 'ncd'],
+  'nppc':              ['palliative', 'pain'],
+  'nmhp':              ['mental health', 'psychiatry', 'psychology'],
+  'nphce':             ['elderly', 'geriatric', 'ageing'],
+  'npcbvi':            ['blindness', 'cataract', 'vision', 'eye'],
+  'nppcd':             ['deafness', 'hearing', 'ear'],
+  'nohp':              ['oral', 'dental', 'teeth'],
+  'niddcp':            ['iodine', 'iodised salt', 'goitre'],
+  'ntcp':              ['tobacco', 'smoking', 'cotpa'],
+  'npcchh':            ['climate', 'heat', 'environment', 'air quality'],
+  'hss-urban':         ['urban', 'city', 'nuhm'],
+  'hss-rural':         ['rural', 'hwc', 'ayushman arogya'],
+  'drugs-diagnostics': ['drugs', 'diagnostics', 'medicine', 'lab', 'supply chain'],
+  'mpw':               ['multipurpose worker', 'asha', 'community worker'],
+  'staff-nurse':       ['nurse', 'nursing', 'sn'],
+  'cho':               ['community health officer', 'cho'],
+  'lab-tech':          ['lab technician', 'laboratory', 'lt'],
+  'pharmacist':        ['pharmacy', 'pharma'],
+  'medical-officer':   ['doctor', 'mbbs', 'mo', 'physician'],
+  'specialist':        ['specialist', 'surgeon', 'gynaecologist', 'paediatrician'],
+  'pm-abhim':          ['abhim', 'health infrastructure', 'iphl', 'xv fc', '15th finance'],
+};
+
 function matchesSearch(progId, query) {
   if (!query) return true;
   const q = query.toLowerCase();
   const label = (PROG_LABEL[progId] || progId).toLowerCase();
-  return label.includes(q) || progId.toLowerCase().includes(q);
+  if (label.includes(q) || progId.toLowerCase().includes(q)) return true;
+  return (PROG_ALIASES[progId] || []).some(alias => alias.includes(q) || q.includes(alias));
 }
 
 export default function HomePage({ onSelectProgram, onSelectDivision }) {
