@@ -618,43 +618,6 @@ export default function HRHCadrePage({ program, division, onBack, onCurrentStatu
           </div>
         )}
 
-        {/* ── Observations + Actions ─────────────────────── */}
-        {(program.observations?.length > 0 || program.actions?.length > 0) && (
-          <div className="hrh-cadre-section detail-two-col">
-            {program.observations?.length > 0 && (
-              <div className="detail-card">
-                <div className="detail-card-header">
-                  <h3>Key Observations</h3>
-                  <span className="detail-card-note">HRH Review · NPCC Apr 2026</span>
-                </div>
-                <ul className="obs-list">
-                  {program.observations.map((o, i) => (
-                    <li key={i} className="obs-item">
-                      <span className="obs-marker" />
-                      {o}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            {program.actions?.length > 0 && (
-              <div className="detail-card">
-                <div className="detail-card-header">
-                  <h3>Priority Actions</h3>
-                  <span className="detail-card-note">NPCC Apr 2026</span>
-                </div>
-                <ol className="action-list">
-                  {program.actions.map((a, i) => (
-                    <li key={i} className="action-item">
-                      <span className="action-num">{String(i + 1).padStart(2, '0')}</span>
-                      <span>{a}</span>
-                    </li>
-                  ))}
-                </ol>
-              </div>
-            )}
-          </div>
-        )}
 
         {/* ── State HRH context ─────────────────────────── */}
         <div className="hrh-cadre-section">
