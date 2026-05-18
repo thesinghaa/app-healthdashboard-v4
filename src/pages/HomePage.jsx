@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { DIVISIONS, STATUS_CONFIG } from '../data/programs';
+import { KD_TREE } from '../data/kdData';
 
 function getSummary() {
   let total = 0, red = 0, yellow = 0, green = 0;
@@ -121,12 +122,33 @@ const PROG_ALIASES = {
   'pm-abhim':          ['abhim', 'health infrastructure', 'iphl', 'xv fc', '15th finance'],
 };
 
+// Build full-text search index from all KD indicators + statements
+const PROG_KD_INDEX = (() => {
+  const index = {};
+  Object.values(KD_TREE).forEach(divData => {
+    Object.entries(divData.programmes || {}).forEach(([progId, progData]) => {
+      const terms = [];
+      (progData.kds || []).forEach(kd => {
+        if (kd.indicator) terms.push(kd.indicator.toLowerCase());
+        if (kd.statement) terms.push(kd.statement.toLowerCase());
+        if (kd.type)      terms.push(kd.type.toLowerCase());
+        if (kd.unit)      terms.push(kd.unit.toLowerCase());
+        if (kd.source)    terms.push(kd.source.toLowerCase());
+      });
+      index[progId] = terms;
+    });
+  });
+  return index;
+})();
+
 function matchesSearch(progId, query) {
   if (!query) return true;
-  const q = query.toLowerCase();
+  const q = query.toLowerCase().trim();
+  if (!q) return true;
   const label = (PROG_LABEL[progId] || progId).toLowerCase();
   if (label.includes(q) || progId.toLowerCase().includes(q)) return true;
-  return (PROG_ALIASES[progId] || []).some(alias => alias.includes(q) || q.includes(alias));
+  if ((PROG_ALIASES[progId] || []).some(alias => alias.includes(q) || q.includes(alias))) return true;
+  return (PROG_KD_INDEX[progId] || []).some(term => term.includes(q));
 }
 
 export default function HomePage({ onSelectProgram, onSelectDivision }) {
