@@ -3606,14 +3606,14 @@
   margin-bottom: 4px;
 }
 .lp-div-tag {
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 800;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: #FF5500;
   background: rgba(255,255,255,0.70);
   border: 1px solid rgba(255,85,0,0.28);
-  padding: 2px 8px;
+  padding: 3px 10px;
   border-radius: 10px;
 }
 .lp-expand-btn {
@@ -3636,11 +3636,11 @@
 }
 .lp-div-name {
   font-family: 'Playfair Display', Georgia, serif;
-  font-size: 12.5px;
+  font-size: 16px;
   font-weight: 700;
   color: #1A0E06;
   line-height: 1.25;
-  margin: 0 0 3px;
+  margin: 0 0 8px;
   letter-spacing: -0.01em;
 }
 .lp-div-desc {

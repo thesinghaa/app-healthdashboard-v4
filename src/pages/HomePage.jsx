@@ -185,7 +185,6 @@ export default function HomePage({ onSelectProgram, onSelectDivision }) {
                     </button>
                   </div>
                   <h2 className="lp-div-name">{div.fullName}</h2>
-                  <p className="lp-div-desc">{DIV_DESC[div.id]}</p>
                   <div className="lp-div-counts">
                     {counts.red    > 0 && <span className="lp-count lp-count--red">{counts.red} Critical</span>}
                     {counts.yellow > 0 && <span className="lp-count lp-count--yellow">{counts.yellow} Caution</span>}
