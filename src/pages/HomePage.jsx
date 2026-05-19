@@ -176,7 +176,12 @@ export default function HomePage({ onSelectProgram, onSelectDivision }) {
 
   return (
     <div className="home-root" ref={rootRef}>
-      <div className="home-bg-gradient" />
+      <div className="home-bg-gradient">
+        <div className="bg-orb bg-orb--1" />
+        <div className="bg-orb bg-orb--2" />
+        <div className="bg-orb bg-orb--3" />
+        <div className="bg-orb bg-orb--4" />
+      </div>
       <div className="home-content">
 
         {/* ── Original navbar — waves + glass pill ── */}

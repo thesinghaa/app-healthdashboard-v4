@@ -12,7 +12,7 @@
   position: relative;
 }
 
-/* Layer 0: aurora mesh background — blurry teal/navy orbs */
+/* Layer 0: aurora mesh background */
 .home-bg-gradient {
   position: fixed;
   inset: 0;
@@ -22,47 +22,104 @@
   overflow: hidden;
 }
 
-/* Orb 1 — large teal bloom, top-left */
-.home-bg-gradient::before {
-  content: '';
+/* ── Flowing orb divs ────────────────────────────────────────────── */
+.bg-orb {
   position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  will-change: transform;
+}
+
+/* Orb 1 — large primary teal, top-left, slowest */
+.bg-orb--1 {
   width: 900px;
   height: 700px;
-  top: -200px;
-  left: -180px;
+  top: -220px;
+  left: -200px;
   background: radial-gradient(ellipse at center,
-    rgba(0,181,204,0.28) 0%,
-    rgba(0,150,175,0.14) 35%,
+    rgba(0,181,204,0.30) 0%,
+    rgba(0,150,175,0.14) 40%,
     transparent 70%
   );
   filter: blur(80px);
-  border-radius: 50%;
+  animation: orbDrift1 22s ease-in-out infinite;
 }
 
-/* Orb 2 — mid teal, bottom-right */
-.home-bg-gradient::after {
-  content: '';
-  position: absolute;
-  width: 800px;
+/* Orb 2 — deep teal, bottom-right, medium */
+.bg-orb--2 {
+  width: 750px;
   height: 600px;
-  bottom: -150px;
-  right: -100px;
+  bottom: -180px;
+  right: -120px;
   background: radial-gradient(ellipse at center,
-    rgba(0,204,229,0.22) 0%,
-    rgba(0,130,160,0.10) 40%,
+    rgba(0,204,229,0.24) 0%,
+    rgba(0,120,150,0.10) 45%,
     transparent 70%
   );
   filter: blur(90px);
-  border-radius: 50%;
+  animation: orbDrift2 28s ease-in-out infinite;
 }
 
-/* Extra orbs via box-shadow on a pseudo-wrapper — inlined as a 3rd div approach isn't possible,
-   so we layer the remaining orbs via a stacked background on the element itself */
-.home-bg-gradient {
-  background-image:
-    radial-gradient(ellipse 600px 500px at 70% 20%, rgba(0,181,204,0.14) 0%, transparent 70%),
-    radial-gradient(ellipse 500px 400px at 30% 80%, rgba(0,97,120,0.18) 0%, transparent 65%),
-    radial-gradient(ellipse 350px 280px at 85% 65%, rgba(0,204,229,0.10) 0%, transparent 60%);
+/* Orb 3 — smaller accent, centre-right */
+.bg-orb--3 {
+  width: 550px;
+  height: 450px;
+  top: 15%;
+  right: 10%;
+  background: radial-gradient(ellipse at center,
+    rgba(0,181,204,0.16) 0%,
+    rgba(0,97,120,0.08) 50%,
+    transparent 70%
+  );
+  filter: blur(70px);
+  animation: orbDrift3 18s ease-in-out infinite;
+}
+
+/* Orb 4 — deep navy accent, bottom-left */
+.bg-orb--4 {
+  width: 500px;
+  height: 400px;
+  bottom: 5%;
+  left: 15%;
+  background: radial-gradient(ellipse at center,
+    rgba(0,150,180,0.18) 0%,
+    rgba(0,80,110,0.08) 50%,
+    transparent 70%
+  );
+  filter: blur(75px);
+  animation: orbDrift4 24s ease-in-out infinite;
+}
+
+/* ── Drift keyframes — each orb traces a lazy figure-8 path ──────── */
+@keyframes orbDrift1 {
+  0%   { transform: translate(0px,   0px)  scale(1);    }
+  25%  { transform: translate(70px, -50px) scale(1.06); }
+  50%  { transform: translate(40px,  60px) scale(0.96); }
+  75%  { transform: translate(-50px, 30px) scale(1.03); }
+  100% { transform: translate(0px,   0px)  scale(1);    }
+}
+@keyframes orbDrift2 {
+  0%   { transform: translate(0px,    0px)  scale(1);    }
+  30%  { transform: translate(-60px,  40px) scale(1.05); }
+  60%  { transform: translate(50px,  -70px) scale(0.94); }
+  80%  { transform: translate(-20px, -30px) scale(1.02); }
+  100% { transform: translate(0px,    0px)  scale(1);    }
+}
+@keyframes orbDrift3 {
+  0%   { transform: translate(0px,   0px)  scale(1);    }
+  33%  { transform: translate(-40px, 55px) scale(1.08); }
+  66%  { transform: translate(60px, -35px) scale(0.93); }
+  100% { transform: translate(0px,   0px)  scale(1);    }
+}
+@keyframes orbDrift4 {
+  0%   { transform: translate(0px,   0px)  scale(1);    }
+  40%  { transform: translate(50px, -45px) scale(1.06); }
+  70%  { transform: translate(-35px, 40px) scale(0.97); }
+  100% { transform: translate(0px,   0px)  scale(1);    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bg-orb { animation: none; }
 }
 
 /* Layer 1: decorative icons (rendered by DecorativeIcons component) */
