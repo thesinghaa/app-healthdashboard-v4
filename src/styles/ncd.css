@@ -4574,3 +4574,50 @@ h1, h2, h3, h4 {
   color: #0097ab !important;
 }
 /* ── END LIGHT-BLUE NAVBAR: search bar overrides ─────────────────── */
+
+/* ── GLOBAL AURORA: all page roots transparent ───────────────────── */
+.ncd-root,
+.flip-stage,
+.flip-page {
+  background: transparent !important;
+}
+
+/* All topbars — dark frosted glass over aurora */
+.ncd-topbar,
+.dv-topbar,
+.app-topbar,
+.csd-topbar {
+  background: rgba(8,6,20,0.72) !important;
+  backdrop-filter: blur(20px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(160%) !important;
+  border-bottom: 1px solid rgba(255,255,255,0.08) !important;
+}
+
+/* KD/programme section backgrounds — dark glass */
+.kd-prog-section,
+.ncd-kd-section,
+.hmis-section,
+.hrh-cadre-section,
+.csd-charts-outer {
+  background: rgba(10,8,22,0.75) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border-color: rgba(255,255,255,0.06) !important;
+}
+
+/* Detail page cards — dark glass */
+.detail-card,
+.kdi-section,
+.cs-plot-card {
+  background: rgba(10,8,22,0.78) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  border-color: rgba(255,255,255,0.07) !important;
+}
+
+/* Table heads — very dark */
+.kd-table-head,
+.kd-type-divider {
+  background: rgba(6,4,16,0.85) !important;
+}
+/* ── END GLOBAL AURORA ───────────────────────────────────────────── */

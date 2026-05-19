@@ -145,10 +145,19 @@ export default function App() {
   };
 
   return (
-    <div className="flip-stage">
-      <div className="flip-page" ref={pageRef}>
-        {renderPage()}
+    <>
+      <div className="aurora-blobs" aria-hidden="true">
+        <div className="blob blob--1" />
+        <div className="blob blob--2" />
+        <div className="blob blob--3" />
+        <div className="blob blob--4" />
+        <div className="blob blob--5" />
       </div>
-    </div>
+      <div className="flip-stage">
+        <div className="flip-page" ref={pageRef}>
+          {renderPage()}
+        </div>
+      </div>
+    </>
   );
 }

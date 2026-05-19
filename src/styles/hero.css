@@ -37,53 +37,79 @@
   opacity: 0.90;
 }
 
-/* Blob 1 — cobalt blue, top-left */
+/* Blob 1 — white-lavender hot spot, top-left (signature glow) */
 .blob--1 {
-  width: 900px;
-  height: 800px;
-  top: -10%;
-  left: -15%;
-  background: radial-gradient(circle at 50% 50%, #2563eb 0%, #1e3a8a 50%, transparent 75%);
+  width: 820px;
+  height: 720px;
+  top: -18%;
+  left: -12%;
+  background: radial-gradient(circle at 45% 45%,
+    rgba(255,255,255,0.95) 0%,
+    #d8b4fe 18%,
+    #a855f7 40%,
+    #6d28d9 62%,
+    transparent 80%
+  );
   animation: float1 9s ease-in-out infinite;
 }
 
-/* Blob 2 — deep indigo, top-right */
+/* Blob 2 — rich purple, centre-left body */
 .blob--2 {
-  width: 1000px;
-  height: 900px;
-  top: -20%;
-  right: -20%;
-  background: radial-gradient(circle at 50% 50%, #4f46e5 0%, #312e81 52%, transparent 75%);
-  animation: float2 11s ease-in-out infinite;
+  width: 950px;
+  height: 850px;
+  top: 5%;
+  left: -8%;
+  background: radial-gradient(circle at 50% 50%,
+    #8b5cf6 0%,
+    #6d28d9 40%,
+    #3b0764 70%,
+    transparent 85%
+  );
+  animation: float2 13s ease-in-out infinite;
 }
 
-/* Blob 3 — violet-purple, centre-left */
+/* Blob 3 — deep royal blue, right anchor */
 .blob--3 {
-  width: 800px;
-  height: 700px;
-  top: 25%;
-  left: -5%;
-  background: radial-gradient(circle at 50% 50%, #7c3aed 0%, #4c1d95 52%, transparent 75%);
-  animation: float3 7s ease-in-out infinite;
+  width: 1050px;
+  height: 950px;
+  top: -15%;
+  right: -18%;
+  background: radial-gradient(circle at 50% 50%,
+    #4f46e5 0%,
+    #3730a3 42%,
+    #1e1b4b 68%,
+    transparent 84%
+  );
+  animation: float3 11s ease-in-out infinite;
 }
 
-/* Blob 4 — bright blue pulse, centre */
+/* Blob 4 — cobalt blue, bottom-right */
 .blob--4 {
-  width: 750px;
-  height: 650px;
-  top: 30%;
-  left: 30%;
-  background: radial-gradient(circle at 50% 50%, #3b82f6 0%, #1d4ed8 48%, transparent 72%);
+  width: 780px;
+  height: 680px;
+  bottom: -20%;
+  right: -5%;
+  background: radial-gradient(circle at 50% 50%,
+    #3b82f6 0%,
+    #1d4ed8 45%,
+    #1e3a8a 68%,
+    transparent 82%
+  );
   animation: float4 10s ease-in-out infinite;
 }
 
-/* Blob 5 — deep purple, bottom-right */
+/* Blob 5 — violet mid, bottom-left balance */
 .blob--5 {
-  width: 950px;
-  height: 800px;
-  bottom: -25%;
-  right: -10%;
-  background: radial-gradient(circle at 50% 50%, #6d28d9 0%, #2e1065 55%, transparent 78%);
+  width: 700px;
+  height: 620px;
+  bottom: -15%;
+  left: 5%;
+  background: radial-gradient(circle at 50% 50%,
+    #7c3aed 0%,
+    #4c1d95 48%,
+    #2e1065 70%,
+    transparent 84%
+  );
   animation: float5 8s ease-in-out infinite;
 }
 
