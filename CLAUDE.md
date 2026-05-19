@@ -52,7 +52,7 @@ A React + Vite **health dashboard** tracking NHM Arunachal Pradesh programme per
 | Charts | Recharts (AreaChart for HMIS trends) + Plotly.js via `react-plotly.js` (sunburst charts) |
 | Styling | Plain CSS (`src/styles/ncd.css`) — no Tailwind, no CSS modules |
 | Data | Static JS files + Google Sheets public CSV (no API key) |
-| Fonts | Inter (body), Playfair Display (headings), JetBrains Mono (numbers) |
+| Fonts | Inter 300–800 (body + headings), JetBrains Mono (numbers) — Playfair/DM Sans/Space Grotesk removed |
 | Deploy | Vercel — push to `main` triggers auto-deploy |
 
 ---
@@ -251,20 +251,42 @@ PM-ABHIM is registered in `hrh/index.js` as the 8th programme in the HRH divisio
 
 ---
 
-## Orange glass 3D card design system (added May 2026)
+## Dark mode design system — McKinsey navy/orange (added May 2026)
 
-Applied consistently across all navigation layers via `ncd.css` overrides:
+Full dark mode activated in V3. Token source of truth: `src/styles/tokens.css`.
+
+### Colour tokens
+| Token | Value | Role |
+|-------|-------|------|
+| `--bg` | `#051c2c` | Page root — deep navy |
+| `--bg2` | `#0a2236` | Cards / panels |
+| `--bg3` | `#0f2a40` | Elevated surfaces |
+| `--bg4` | `#163348` | Hover / active |
+| `--org` | `#FF5500` | Primary orange accent |
+| `--blue` | `#00b5cc` | McKinsey teal secondary |
+| `--ink` | `#ffffff` | Primary text |
+| `--ink-mid` | `#e0eaf2` | Secondary text |
+| `--ink-light` | `#b8ccd8` | Tertiary text |
+| `--ink-faint` | `#6b8a9e` | Disabled / meta |
+
+### Typography
+- Body + headings: `Inter` 300–800 (loaded in `index.html`)
+- Numbers: `JetBrains Mono`
+- Playfair Display, DM Sans, Space Grotesk are **removed** from the project
+
+### Glass card system (all layers)
+All card backgrounds use dark glass: `rgba(10,34,54,0.82)` + `blur(18-32px)` + `border: rgba(255,85,0,0.28)` + `border-top: 4px solid #FF5500`.
 
 | Element | Class | Treatment |
 |---------|-------|-----------|
-| Home carousel cards | `.carousel-card` | `border: 4px solid #FF5500`, `blur(32px) saturate(175%)`, warm cream bg, 3-layer depth + orange glow |
-| Carousel division heading | `.cc-header` | `border-left: none` (removed left orange stripe), warm glass bg |
-| Programme row tiles | `.programme-row` | Glass micro-tiles, `border-top: 2px orange`, status left-border colours preserved |
-| Division programme cards | `.dv-prog-card` | `border-top: 4px #FF5500`, `blur(18px)` |
-| KD programme sections | `.kd-prog-section` | Glass container `blur(14px)`, `border-top: 3px`, 16px radius |
-| KD table inside section | `.kd-prog-section .kd-table` | White tile with orange tint border |
-| Detail cards / CS plot cards | `.detail-card`, `.cs-plot-card` | `blur(12px)`, `border-top: 3px`, depth shadows |
-| HRH cadre sections | `.hrh-cadre-section` | Glass panels |
+| Home carousel cards | `.carousel-card` | `border: 4px solid #FF5500`, `blur(32px)`, dark navy glass |
+| Division programme cards | `.dv-prog-card` | `border-top: 4px #FF5500`, `blur(18px)`, dark |
+| KD programme sections | `.kd-prog-section` | Dark glass `blur(14px)`, `border-top: 3px`, 16px radius |
+| Detail cards / CS plot cards | `.detail-card`, `.cs-plot-card` | `bg2`, orange tint border |
+| HRH cadre sections | `.hrh-cadre-section` | `bg2` panels |
+
+### Override block strategy
+Dark mode overrides are appended at the END of each CSS file as clearly labelled `DARK MODE OVERRIDES` blocks. Never edit the original rules — always append. This makes rollback trivial.
 
 **Important**: `.bento-card` class in `grid.css` is dead — NOT used in any JSX. Home page uses `.carousel-card`.
 
