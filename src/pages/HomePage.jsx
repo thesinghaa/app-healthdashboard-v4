@@ -176,13 +176,12 @@ export default function HomePage({ onSelectProgram, onSelectDivision }) {
 
   return (
     <div className="home-root" ref={rootRef}>
-      <div className="home-bg-gradient">
-        <div className="bg-orb bg-orb--1" />
-        <div className="bg-orb bg-orb--2" />
-        <div className="bg-orb bg-orb--3" />
-        <div className="bg-orb bg-orb--4" />
-        <div className="bg-orb bg-orb--5" />
-        <div className="bg-orb bg-orb--6" />
+      <div className="aurora-blobs" aria-hidden="true">
+        <div className="blob blob--1" />
+        <div className="blob blob--2" />
+        <div className="blob blob--3" />
+        <div className="blob blob--4" />
+        <div className="blob blob--5" />
       </div>
       <div className="home-content">
 
