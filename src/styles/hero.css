@@ -12,15 +12,57 @@
   position: relative;
 }
 
-/* Layer 0: neutral page background with subtle dot grid */
+/* Layer 0: aurora mesh background — blurry teal/navy orbs */
 .home-bg-gradient {
   position: fixed;
   inset: 0;
-  background-color: var(--bg);
-  background-image: radial-gradient(circle, rgba(0,181,204,0.045) 1px, transparent 1px);
-  background-size: 28px 28px;
+  background-color: #03111e;
   z-index: 0;
   pointer-events: none;
+  overflow: hidden;
+}
+
+/* Orb 1 — large teal bloom, top-left */
+.home-bg-gradient::before {
+  content: '';
+  position: absolute;
+  width: 900px;
+  height: 700px;
+  top: -200px;
+  left: -180px;
+  background: radial-gradient(ellipse at center,
+    rgba(0,181,204,0.28) 0%,
+    rgba(0,150,175,0.14) 35%,
+    transparent 70%
+  );
+  filter: blur(80px);
+  border-radius: 50%;
+}
+
+/* Orb 2 — mid teal, bottom-right */
+.home-bg-gradient::after {
+  content: '';
+  position: absolute;
+  width: 800px;
+  height: 600px;
+  bottom: -150px;
+  right: -100px;
+  background: radial-gradient(ellipse at center,
+    rgba(0,204,229,0.22) 0%,
+    rgba(0,130,160,0.10) 40%,
+    transparent 70%
+  );
+  filter: blur(90px);
+  border-radius: 50%;
+}
+
+/* Extra orbs via box-shadow on a pseudo-wrapper — inlined as a 3rd div approach isn't possible,
+   so we layer the remaining orbs via a stacked background on the element itself */
+.home-bg-gradient {
+  background-image:
+    radial-gradient(ellipse 600px 500px at 70% 20%, rgba(0,181,204,0.14) 0%, transparent 70%),
+    radial-gradient(ellipse 500px 400px at 30% 80%, rgba(0,97,120,0.18) 0%, transparent 65%),
+    radial-gradient(ellipse 350px 280px at 85% 65%, rgba(0,204,229,0.10) 0%, transparent 60%);
 }
 
 /* Layer 1: decorative icons (rendered by DecorativeIcons component) */
