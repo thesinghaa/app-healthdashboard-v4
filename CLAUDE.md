@@ -1,6 +1,8 @@
-# AP Health Dashboard — NHM Arunachal Pradesh Demo (CLAUDE.md)
+# PIF Health Dashboard V3 — NHM Arunachal Pradesh (CLAUDE.md)
 
 This file gives any Claude session immediate context on the project so you can contribute without needing prior conversation history.
+
+> **V3 is the ONLY active version.** V1 (`PIFHealthDashboard/`) and V2 (`PIFHealthDashboard-v2/`) are frozen — do not touch them.
 
 ---
 
@@ -11,11 +13,11 @@ This file gives any Claude session immediate context on the project so you can c
 At the close of each session, Claude must:
 1. Review what changed during the session (new components, data mappings, CSS classes, routes, design decisions, bug fixes, deferred items)
 2. Reflect those changes in the relevant sections of this file — update existing entries or add new ones
-3. Commit the updated CLAUDE.md with the same session's final commit, or as a standalone commit:
+3. Commit the updated CLAUDE.md:
    ```
-   git add CLAUDE.md && git commit --author="AryanSinghpif <aryan.singh@pahleindia.org>" -m "docs: update CLAUDE.md with session changes"
+   git add CLAUDE.md && git commit -m "docs: update CLAUDE.md with session changes" && git push origin main
    ```
-4. Push to main
+4. Deploy: `vercel build --prod && vercel deploy --prod --prebuilt`
 
 **Do not end a session without updating this file.** This is the highest-priority rule in the project — it ensures every future session has accurate context without needing conversation history.
 
@@ -31,9 +33,13 @@ What to update:
 
 ## What this project is
 
-A React + Vite **demo health dashboard** tracking NHM Arunachal Pradesh programme performance. Built for **Pahlé India Foundation (PIF)**. Deployed on Vercel via GitHub auto-deploy (push to `main` → live).
+A React + Vite **health dashboard** tracking NHM Arunachal Pradesh programme performance across 5 divisions and 37 programmes. Built for **Pahlé India Foundation (PIF)**.
 
-Live repo: `https://github.com/AryanSinghpif/app-healthdashboard`
+- **Local**: `/Users/thesinghaa/PIFHealthDashboard-v3/`
+- **GitHub**: `https://github.com/thesinghaa/app-healthdashboard-v3`
+- **Live**: `https://pif-health-dashboard-v3.vercel.app`
+- **Git identity**: `thesinghaa <aryanjarvis32@gmail.com>` (set via `git config --local`) — do NOT use `--author` flag
+- **Deploy method**: `vercel build --prod` → `vercel deploy --prod --prebuilt` (fast, ~30s)
 
 ---
 
@@ -278,17 +284,44 @@ All 11 NCD files now have unique, programme-appropriate `keyMetric` and `summary
 
 ## Hard rules (follow exactly)
 
-1. **Git commit author** must always be: `AryanSinghpif <aryan.singh@pahleindia.org>`
-   ```
-   git commit --author="AryanSinghpif <aryan.singh@pahleindia.org>"
-   ```
-2. **No emojis** anywhere — not in code, CSS, or commit messages
-3. **CSS** — append new rules at the bottom of `ncd.css`, never rewrite the whole file
-4. **Subagents** — when spawning agents, do NOT give them access to large files without reading offsets; they will truncate
-5. **NCD_compiled sheet** — do not connect until user asks
-6. **No feature flags, no backwards-compat shims** — just change the code
-7. **Bundle size warning** is expected (~5.6MB due to plotly.js) — it is acceptable, do not try to split unless user asks
-8. **Push/deploy** — always `git push origin main` after committing; Vercel auto-deploys
+1. **V3 only** — never touch `/Users/thesinghaa/PIFHealthDashboard/` (v1) or `/Users/thesinghaa/PIFHealthDashboard-v2/` (v2)
+2. **Git identity** — `thesinghaa <aryanjarvis32@gmail.com>` via `git config --local`. Do NOT use `--author` flag
+3. **No emojis** anywhere — not in code, CSS, or commit messages
+4. **CSS** — append new rules at the bottom of `ncd.css`, never rewrite the whole file
+5. **Subagents** — do NOT give them access to large files without reading offsets; they will truncate
+6. **NCD_compiled sheet** — do not connect until user asks
+7. **No feature flags, no backwards-compat shims** — just change the code
+8. **Bundle size warning** is expected (~5.8MB due to plotly.js + KD_TREE import) — acceptable, do not split unless asked
+9. **Deploy** — `vercel build --prod && vercel deploy --prod --prebuilt` from `/Users/thesinghaa/PIFHealthDashboard-v3/`
+
+---
+
+## Landing page (5-column no-scroll layout) — V3 feature
+
+`src/pages/HomePage.jsx` — replaces the old carousel with 5 simultaneous division columns.
+
+- Each column = one NHM division, width proportional to programme count (`flex: 2.0` to `flex: 1.1`)
+- Orange 3D bento card borders: `border: 4px solid #FF5500`, layered box-shadows, `backdrop-filter: blur(32px)`
+- Card height: `height: calc(100dvh - 130px)` — explicit to prevent border clipping
+- Grid: `.lp-grid` with `align-items: flex-start !important; overflow: visible !important`
+
+### Navbar layout
+Grid: `grid-template-columns: 1fr auto 1fr`
+- Left `1fr`: `.home-brand` (Arunachal Pradesh + subtitle)
+- Center `auto`: `.home-summary` (37 PROGRAMMES | 10 CRITICAL | 21 CAUTION | 6 ON TRACK pill)
+- Right `1fr`: `.home-right` flex container with `.home-legend` (dots) + `.home-nav-search` (search bar)
+
+### Deep search (`matchesSearch` in `HomePage.jsx`)
+Three-tier search — checked in order:
+1. `PROG_LABEL` display name + prog ID
+2. `PROG_ALIASES` — short codes and synonyms (NTEP→TB, RBSK→Child Health, etc.)
+3. `PROG_KD_INDEX` — built at module load from `KD_TREE`: all KD `indicator`, `statement`, `type`, `unit`, `source` strings
+
+Searching "ANC first trimester", "NTEP", "cataract", "high risk pregnancies" etc. all work.
+
+### Search highlight behaviour
+- `lp-prog--dimmed`: non-matching programmes → `opacity: 0.18`
+- `lp-prog--highlighted`: matching programmes → orange outline
 
 ---
 
