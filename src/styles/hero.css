@@ -26,7 +26,7 @@
   z-index: 0;
   pointer-events: none;
   overflow: hidden;
-  filter: blur(60px);
+  filter: blur(100px);
 }
 
 /* Shared blob shape */
@@ -34,56 +34,56 @@
   position: absolute;
   border-radius: 50%;
   will-change: transform;
-  opacity: 0.75;
+  opacity: 0.90;
 }
 
-/* Blob 1 — deep violet, top-left anchor */
+/* Blob 1 — light cyan highlight, left */
 .blob--1 {
-  width: 340px;
-  height: 340px;
-  top: 4%;
-  left: 3%;
-  background: radial-gradient(circle at 50% 50%, #7c3aed 0%, #4f1f8c 60%, transparent 100%);
+  width: 900px;
+  height: 800px;
+  top: -10%;
+  left: -15%;
+  background: radial-gradient(circle at 50% 50%, #40d4ec 0%, #00b5cc 45%, transparent 75%);
   animation: float1 9s ease-in-out infinite;
 }
 
-/* Blob 2 — royal blue, top-right */
+/* Blob 2 — deep navy anchor, right */
 .blob--2 {
-  width: 300px;
-  height: 300px;
-  top: 2%;
-  right: 6%;
-  background: radial-gradient(circle at 50% 50%, #2563eb 0%, #1e3fa8 55%, transparent 100%);
+  width: 1000px;
+  height: 900px;
+  top: -20%;
+  right: -20%;
+  background: radial-gradient(circle at 50% 50%, #0a4a6e 0%, #051c2c 50%, transparent 75%);
   animation: float2 11s ease-in-out infinite;
 }
 
-/* Blob 3 — bright violet, centre */
+/* Blob 3 — mid teal, centre-left */
 .blob--3 {
-  width: 280px;
-  height: 280px;
-  top: 38%;
-  left: 42%;
-  background: radial-gradient(circle at 50% 50%, #a855f7 0%, #7c3aed 50%, transparent 100%);
+  width: 800px;
+  height: 700px;
+  top: 25%;
+  left: -5%;
+  background: radial-gradient(circle at 50% 50%, #0097ab 0%, #00758a 50%, transparent 75%);
   animation: float3 7s ease-in-out infinite;
 }
 
-/* Blob 4 — indigo blue, bottom-left */
+/* Blob 4 — bright teal pulse, centre */
 .blob--4 {
-  width: 320px;
-  height: 320px;
-  bottom: 3%;
-  left: 8%;
-  background: radial-gradient(circle at 50% 50%, #3b82f6 0%, #1d4ed8 55%, transparent 100%);
+  width: 750px;
+  height: 650px;
+  top: 30%;
+  left: 30%;
+  background: radial-gradient(circle at 50% 50%, #00cce5 0%, #0097ab 45%, transparent 72%);
   animation: float4 10s ease-in-out infinite;
 }
 
-/* Blob 5 — deep purple, bottom-right */
+/* Blob 5 — darkest navy, bottom-right depth */
 .blob--5 {
-  width: 260px;
-  height: 260px;
-  bottom: 6%;
-  right: 4%;
-  background: radial-gradient(circle at 50% 50%, #6d28d9 0%, #4f1f8c 55%, transparent 100%);
+  width: 950px;
+  height: 800px;
+  bottom: -25%;
+  right: -10%;
+  background: radial-gradient(circle at 50% 50%, #0d3a52 0%, #020d16 55%, transparent 78%);
   animation: float5 8s ease-in-out infinite;
 }
 
@@ -119,16 +119,16 @@
   100% { transform: translate(0px,   0px)  scale(1);    }
 }
 
-/* Dark vignette — keeps edges contrastly dark, blobs don't bleed out */
+/* Dark vignette — subtle edge darkening so cards pop */
 .aurora-blobs::after {
   content: '';
   position: absolute;
   inset: 0;
   background: radial-gradient(
-    ellipse 75% 70% at 50% 50%,
-    transparent 30%,
-    rgba(13,13,26,0.55) 65%,
-    rgba(13,13,26,0.85) 100%
+    ellipse 90% 85% at 50% 50%,
+    transparent 40%,
+    rgba(2,13,22,0.30) 75%,
+    rgba(2,13,22,0.55) 100%
   );
   pointer-events: none;
 }
