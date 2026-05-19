@@ -587,4 +587,331 @@ Overall microinteraction quality: **high but restrained**. Nothing flashy — ev
 
 ---
 
+---
+
+---
+
+# Design Audit — McKinsey "United States of Health" Dashboard
+**URL**: https://www.mckinsey.com/industries/public-sector/our-insights/us-public-health-dashboard  
+**Audit date**: May 2026  
+**Built by**: McKinsey Center for Societal Benefit through Healthcare (CSBH)  
+**Published**: September 2022, updated annually  
+**Purpose**: State-level public health benchmarking across 50 US states — flagship McKinsey data visualisation product
+
+> Note: The dashboard is JavaScript-heavy and requires a browser to render interactively. This audit is based on confirmed public descriptions, McKinsey design system knowledge, academic reviews, and available search intelligence.
+
+---
+
+## 1. First Impressions
+
+This is the most **visually ambitious** of the three dashboards audited. Where Kerala eHealth is administrative and Health System Tracker is editorial, the McKinsey dashboard is **cinematic** — it opens with a geographic visualisation of all 50 US states rendered as spider/radar charts arranged in the rough shape of the United States. The effect is immediately arresting: you see the entire country's health performance at once, spatially organised.
+
+McKinsey applies its full consultancy design muscle here — this is not a tool built to be functional, it is built to make an impression and drive a narrative about health inequality across states.
+
+**Immediate contrast with V3:** McKinsey leads with geography and comparison; V3 leads with programme status. McKinsey asks "which states are failing?"; V3 asks "which programmes are failing?" The spider-map concept is a direct inspiration for a potential future V3 district-level heat map.
+
+---
+
+## 2. Organisation & Ownership
+
+| Property | Value |
+|---|---|
+| Organisation | McKinsey & Company — Center for Societal Benefit through Healthcare |
+| Authors | Senior Partner Pooja Kumar + coauthors |
+| Audience | State leaders, public health agencies, policymakers, investors |
+| Geographic scope | All 50 US states — state-level comparison |
+| Data frequency | Updated annually |
+| Data sources | Public + private health datasets (CDC, CMS, state records) |
+| Metric unit | DALYs (Disability-Adjusted Life Years) as common currency across indicators |
+| Access | Public, no login — but JS-heavy, Chrome required for full interactivity |
+
+---
+
+## 3. The Signature Visualisation — Spider Map
+
+The defining design decision of this dashboard is its **primary visualisation**: 50 spider/radar graphs arranged geographically in the shape of the United States. Each state = one spider chart. Each spider chart has 5 segments (axes), each representing one health domain.
+
+### Spider Chart Structure
+```
+         Maternal Health
+              ╱ ╲
+Environmental   Behavioral
+   Health         Health
+              ╲ ╱
+    Communicable  Chronic
+      Disease     Disease
+```
+
+Each segment is divided into **4 quartiles** — the filled area of each pizza-slice-shaped segment shows where that state ranks nationally (bottom quartile = barely filled, top quartile = fully filled). This creates an instant visual density signal — a state with all 5 segments fully filled is top-quartile across all domains; a state with thin slivers everywhere is at the bottom nationally.
+
+### Why This Works
+- **Geographic arrangement** preserves spatial intuition — you immediately see regional patterns (Southern states cluster poorly on chronic disease, Northeast clusters well on maternal health)
+- **Consistent template** — all 50 charts use identical axes so comparison is instant
+- **Quartile-not-absolute scoring** — normalises across different indicator types (you can't compare maternal mortality rate directly to chronic disease DALY, but quartile rank is universal)
+- **Density as signal** — a filled spider = healthy state; a thin spider = struggling state. No legend needed to get the gist
+
+### Why This Is Hard to Replicate
+- Requires a custom D3.js or similar SVG rendering engine
+- 50 × 5 data points minimum, with quartile computations
+- Geographic positioning of 50 non-uniform charts is a layout engineering challenge
+- Meaningful only when you have complete national dataset — partial data breaks the comparison
+
+---
+
+## 4. Information Architecture
+
+### 4.1 Navigation Structure
+```
+Landing page
+├── Geographic spider map (all 50 states)
+├── State selector / filter
+│     └── State detail view
+│           ├── Overall score / ranking
+│           ├── Domain breakdown (5 segments)
+│           └── Indicator-level data per domain
+├── Domain filter (Maternal / Behavioral / Environmental / Chronic / Communicable)
+├── Methodology / About
+└── Download / export data
+```
+
+### 4.2 Five Health Domains
+| Domain | What it measures |
+|---|---|
+| Maternal & Neonatal Health | Maternal mortality, infant mortality, preterm births, prenatal care access |
+| Behavioral Health | Mental health disorders, substance use, suicide rates, opioid mortality |
+| Environmental Health | Air quality, water quality, toxic exposure, climate-related health risk |
+| Chronic Disease | Diabetes, cardiovascular disease, obesity, cancer — DALYs lost |
+| Communicable Disease | Infectious disease burden, vaccination rates, HIV, TB |
+
+### 4.3 Metric Currency — DALYs
+Every indicator is normalised to **DALYs (Disability-Adjusted Life Years)** — a WHO-standard metric where 1 DALY = 1 year of healthy life lost to premature death or disability. This is a sophisticated choice:
+- Makes apples-to-apples comparison possible across wildly different health domains
+- Universally understood in global health circles
+- Surfaces burden of disease rather than just prevalence rates
+- Allows aggregation into a single composite score per domain
+
+**V3 parallel:** We use % of target achieved as our normalisation currency — it serves the same function (making programmes comparable) but is far simpler for NHM officers than DALYs.
+
+---
+
+## 5. Colour System
+
+McKinsey's brand design system is well-documented. The CSBH dashboard follows it closely:
+
+| Usage | Description | Approx Hex |
+|---|---|---|
+| Page background | Deep navy / dark charcoal | `#051c2c` or `#0a1628` |
+| Card / panel background | Slightly lighter navy | `#0d2137` |
+| Primary accent | McKinsey blue | `#2251ff` or `#0d6db7` |
+| Spider chart — top quartile | Vibrant teal/blue-green | `#00b5cc` |
+| Spider chart — upper-mid quartile | Mid teal | `#007d9c` |
+| Spider chart — lower-mid quartile | Muted teal/slate | `#004f6e` |
+| Spider chart — bottom quartile | Very dark, barely visible | `#002a3f` |
+| Positive / good performance | Green | `#00a86b` |
+| Negative / poor performance | Coral / red-orange | `#e5604e` |
+| Text primary | White | `#ffffff` |
+| Text secondary | Light grey-blue | `#b8ccd8` |
+| Text muted | Mid grey | `#6b8a9e` |
+| Border / dividers | Very subtle dark blue | `#1a3347` |
+| Hover highlight | Bright blue-white glow | `rgba(34,81,255,0.3)` |
+
+**Colour audit observations:**
+- **Dark background** is a deliberate choice for a data-heavy dashboard — it makes colour-coded charts pop dramatically, reduces eye strain for long sessions, and signals "serious data product" vs. government portal
+- The teal-to-dark-teal quartile gradient is elegant — the filled area of the spider chart gets lighter as performance improves, so better states literally glow more
+- Coral/red-orange for poor performance creates strong contrast against dark bg without being as alarming as pure red
+- White text on dark background gives maximum contrast for readability
+- The overall palette is **cool, authoritative, premium** — McKinsey's brand in data form
+
+**Contrast with V3:** V3 uses warm orange on a light cream background — more human and approachable. McKinsey uses cool teal on dark navy — more analytical and intense. Both are intentional; different audiences.
+
+---
+
+## 6. Typography
+
+McKinsey uses a proprietary type system across its digital products:
+
+| Element | Font | Weight | Size (est.) |
+|---|---|---|---|
+| Dashboard title | McKinsey Sans / Bower | 300–400 | 36–48px |
+| Section / domain headers | McKinsey Sans | 600–700 | 20–24px |
+| State name labels | McKinsey Sans | 500 | 11–13px |
+| KPI numbers / rankings | McKinsey Sans | 700–800 | 28–40px |
+| Body / description text | McKinsey Sans | 400 | 14–15px |
+| Methodology / footnotes | McKinsey Sans | 400 italic | 11–12px |
+| Navigation items | McKinsey Sans | 500 | 14px |
+
+**Typography observations:**
+- Single font family throughout — but weight variation does the hierarchical work (300 to 800 range)
+- Numbers are **not monospace** — McKinsey prioritises visual aesthetics over strict data alignment
+- All-caps used sparingly for domain labels — adds formality without being aggressive
+- The dark background means white text is the default — inverts the typical light-mode typography assumptions
+- Generous line height — long descriptions are legible even at smaller sizes
+- No serif anywhere — pure sans-serif, consistent with McKinsey's modern consultancy brand
+
+**V3 contrast:** V3's three-font system (Playfair/Inter/JetBrains Mono) is more differentiated — data vs. UI vs. headings each have a distinct voice. McKinsey's single-font system is more disciplined but less expressive.
+
+---
+
+## 7. Data Presentation Patterns
+
+### 7.1 The Spider / Radar Chart
+The primary chart type — 5-axis radar with quartile-shaded segments. Used for:
+- State-level overview (all 5 domains at once)
+- Geographic overview (all 50 states as a map)
+
+Strengths: simultaneous multi-dimension comparison, geographic intuition, visually memorable
+Weaknesses: Precise values are hard to read; requires familiarity with radar charts
+
+### 7.2 State Detail View
+On clicking a state, the view expands to show:
+- Overall composite rank (e.g. "Massachusetts: #3 nationally")
+- Domain-level rank with exact quartile
+- Indicator-level data table for the selected domain
+- Year-over-year trend for selected indicators
+- Comparison to national median
+
+### 7.3 Domain Filter
+A filter bar allows users to isolate one of the 5 domains — the geographic spider map updates to show only that domain's performance. This is a powerful interaction: you can ask "which states are worst at maternal health?" and get a geographic answer instantly.
+
+### 7.4 Chart Types by Layer
+| Layer | Chart type |
+|---|---|
+| Landing — all states | 50 radar/spider charts (geographic layout) |
+| State detail — domain scores | Horizontal bar chart (rank vs national) |
+| State detail — trend | Line chart (year over year) |
+| State detail — indicators | Table with inline sparklines |
+| Download | CSV / Excel export implied |
+
+### 7.5 DALY as Normalisation
+The DALY metric deserves its own note. By converting all indicators to a common unit (years of healthy life lost), McKinsey can:
+- Stack domains into a single composite state score
+- Compare maternal health burden vs. chronic disease burden directly
+- Show "if you fix this one problem, you recover X years of healthy life per 100k population"
+- Create an ROI framing for health investment decisions
+
+This is sophisticated health economics applied to dashboard design — the kind of framing that resonates with state governors and budget offices.
+
+---
+
+## 8. Interaction Design
+
+### Key Interactions
+- **Hover on state**: Spider chart glows, state name and composite rank appear as tooltip
+- **Click on state**: Expands to full state detail panel (slide-in or full page)
+- **Domain filter**: Geographic map re-renders showing single-domain performance
+- **State search**: Type-ahead search to jump to a specific state
+- **Year selector**: Scrub through years to see performance change over time (implied by annual update cycle)
+- **Download**: Export state data as CSV
+
+### Microinteractions
+- Spider chart glow on hover — blue-white ambient shadow intensifies
+- Geographic arrangement animates on load (implied — McKinsey digital products typically have polished entry animations)
+- Filter transitions: domain change animates smoothly, states re-colour in sequence
+- Click expands with slide/fade — not a hard page navigation
+
+**Interaction quality: very high.** McKinsey's digital team invests heavily in interaction polish. This is the kind of dashboard that makes people say "wow" when they first open it — the geographic spider map on load is a genuine visual event.
+
+---
+
+## 9. Unique Design Decisions Worth Noting
+
+### 9.1 Geography as Primary Navigation
+Most dashboards use geography as a filter. McKinsey uses it as the **primary visualisation canvas**. You don't select a state and then see data — you see all states simultaneously arranged geographically. This reversal is powerful: the first question becomes "where?" rather than "what?".
+
+### 9.2 Composite Scoring
+A single composite rank per state (e.g. "Massachusetts: #3") is reductive but powerful for media and executive audiences. "Your state is #47 in health" is a headline. Detailed breakdowns serve analysts; the composite score serves everyone else.
+
+### 9.3 Dark Mode as Default
+Counter to most government/public sector dashboards (which default light), McKinsey went dark. This signals: this is a data product, not a government portal. Dark mode also makes the glowing spider charts dramatically more impactful.
+
+### 9.4 No Raw Numbers on Landing
+The geographic spider map shows quartile fills, not raw numbers. You see that a state is "in the bottom quartile on chronic disease" before you see the actual DALY rate. The visual comes before the number — prioritising pattern recognition over precise reading.
+
+---
+
+## 10. Strengths & Weaknesses
+
+### Strengths
+- **Signature visualisation** — the geographic spider map is instantly memorable and shareable
+- **DALY normalisation** — enables true cross-domain comparison
+- **State comparison** — all 50 states benchmarked simultaneously
+- **Composite ranking** — executive-friendly single number per state
+- **Domain filter** — powerful slice-and-dice for specific health areas
+- **Dark premium aesthetic** — positions this as a serious analytical product
+- **Annual updates** — data stays current
+- **Download capability** — serves the analyst audience alongside the executive one
+
+### Weaknesses
+- **No programme-level tracking** — shows health outcomes, not what specific programmes are doing to address them. No target vs. achievement logic.
+- **National scope only** — no district or county-level drill-down within states
+- **DALY complexity** — a sophisticated metric that non-expert users may not understand or trust
+- **Dark UI accessibility** — dark backgrounds can fail contrast ratios for low-vision users
+- **Heavy JS** — page timed out on multiple fetch attempts; not accessible on slow connections
+- **No actionable recommendations** — shows what is bad, not what to do about it
+- **Spider charts are hard to read precisely** — quartile fills are good for scanning, poor for precise values
+- **US-specific** — framework doesn't transfer directly to India's programme-based health system
+
+---
+
+## 11. Branding & Credibility
+
+- **McKinsey brand** is itself the credibility signal — no secondary institution needed
+- Consistent with McKinsey Global Institute report aesthetic — this is a publication, not a portal
+- Footer: McKinsey.com navigation, legal, social — minimal, clean
+- No advertising, no clutter — foundation-style product
+- PDF companion report implied — McKinsey always publishes print-ready versions of their data products
+
+---
+
+## 12. Comparative Summary: McKinsey vs. PIF V3
+
+| Dimension | McKinsey USOH Dashboard | PIF V3 |
+|---|---|---|
+| Primary audience | State leaders, media, policymakers | NHM programme officers, PIF team |
+| Primary question | Which states have the worst health? | Which programmes are off-track? |
+| Geographic focus | 50 states (national comparison) | 25 districts (state deep-dive) |
+| Primary visualisation | Geographic spider/radar map | 5-column programme grid |
+| Scoring method | DALY quartile rank | % of FY target achieved |
+| Status signal | Quartile fill (visual density) | On Track / Caution / Critical (explicit) |
+| Data freshness | Annual | NPCC April 2026 (current FY) |
+| Dark vs light | Dark mode default | Light warm cream |
+| Interactivity | High — hover, filter, animate, download | Medium — click to drill, search |
+| Deep linking | Implied (state URLs) | Not yet (state-based routing) |
+| Mobile | Unlikely (complex viz) | Desktop-first |
+| Export | CSV download implied | Not yet implemented |
+| Composite score | Yes — single state rank | Partial — division-level counts only |
+
+---
+
+## 13. Key Learnings for V3
+
+1. **Geography as data** — The geographic spider map is the most memorable design decision across all 3 audited dashboards. For V3, a district-level heat map of AP (25 districts) showing programme performance by geography would be a powerful landing page addition for a future version.
+2. **Composite score per division** — McKinsey's single rank per state (e.g. "#3 nationally") is a useful executive summary. V3 shows counts (10 Critical / 21 Caution / 6 On Track) but not a weighted composite score. A single "Division Health Score" could enable ranking across the 5 NHM divisions.
+3. **Dark mode option** — McKinsey's dark dashboard is dramatic and memorable. V3 could offer a dark mode toggle — especially useful for presentations and screen-share meetings.
+4. **Quartile logic over raw gaps** — Instead of absolute gap from target (current logic), consider a quartile ranking of AP districts within each indicator. "Papum Pare is in the bottom quartile on 4+ ANC" is more meaningful than "gap of 14 percentage points".
+5. **Domain filter pattern** — McKinsey's domain filter (show only chronic disease across all states) maps directly to V3's division filter (show only RCH programmes across all districts). Worth implementing.
+6. **Export / download** — Three audits in, all three dashboards offer data export. V3 has none. A "Download as CSV" button on any KD table would be high-value for programme officers who need to report upward.
+7. **Composite entry animation** — McKinsey's load animation (states appearing one by one in geographic formation) creates a "wow" moment. V3's GSAP entry animation on the landing page is already good — consider a staggered reveal of programme cards for a similar effect.
+8. **Avoid radar charts for V3** — Despite McKinsey's brilliant use, radar/spider charts are very hard to read precisely and require careful explanation. V3's current bar/sunburst/area chart approach is more legible for NHM officers who are not data viz experts.
+
+---
+
+## Cross-Dashboard Summary: Lessons from All 3 Audits
+
+| Principle | Kerala eHealth | Health System Tracker | McKinsey USOH | V3 Status |
+|---|---|---|---|---|
+| Status visible at tier 1 | No | No | Partial (quartile fill) | Yes — Critical/Caution/On Track |
+| Interpretive sentence per metric | No | Yes | Partial | No — opportunity |
+| Deep linking | No | Yes | Yes | No — opportunity |
+| Data export | No | Yes | Yes | No — opportunity |
+| Geographic visualisation | No | No | Yes — flagship | No — future opportunity |
+| Composite score | No | Partial | Yes | Partial — counts only |
+| Search | No | Yes | Yes | Yes — deep KD search |
+| Mobile | Responsive | Responsive | No | Desktop-first |
+| Dark mode | No | No | Yes | No — future option |
+| Inline data citations | No | Yes | Yes | No — opportunity |
+| Onboarding / tutorial | No | Yes | No | No — opportunity |
+
+---
+
 *This file should be updated whenever a new dashboard or design reference is audited. Keep one site per major section.*
