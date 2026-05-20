@@ -14,14 +14,6 @@ const DIV_COLORS = {
   hrh:  { border: '#a5b4fc', glow: 'rgba(165,180,252,0.28)' },
 };
 
-/* ── Key highlight per division ──────────────────────────────────── */
-const DIV_HIGHLIGHT = {
-  rch:  'Maternal Health · 4+ ANC: 36.5%',
-  ndcp: 'TB Mukt Bharat · Elimination 2025',
-  ncd:  'NP-NCD · Hypertension 33.1%',
-  hss:  'Drug stock · <2 weeks critical',
-  hrh:  '880 MPW · 520 Medical Officers',
-};
 
 function getDivStats(div) {
   let red = 0, yellow = 0, green = 0;
@@ -154,9 +146,6 @@ export default function LandingPage({ onSelectDivision, onViewSummary, onDirectK
                 {stats.yellow > 0 && <span className="lnd-pill lnd-pill--yellow">{stats.yellow} Caution</span>}
                 {stats.green  > 0 && <span className="lnd-pill lnd-pill--green">{stats.green} On Track</span>}
               </div>
-
-              {/* Highlight */}
-              <p className="lnd-card-highlight">{DIV_HIGHLIGHT[div.id]}</p>
 
               {/* Summary */}
               <Suspense fallback={<div className="lnd-summary-skeleton" />}>

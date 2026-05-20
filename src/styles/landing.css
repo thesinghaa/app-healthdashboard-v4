@@ -319,16 +319,6 @@
 .lnd-pill--yellow { background: rgba(234,179,8,0.12);  color: #fde68a; border: 1px solid rgba(234,179,8,0.22);  }
 .lnd-pill--green  { background: rgba(34,197,94,0.12);  color: #86efac; border: 1px solid rgba(34,197,94,0.22);  }
 
-.lnd-card-highlight {
-  font-family: 'Inter', sans-serif;
-  font-size: 12px;
-  font-weight: 400;
-  color: rgba(255,255,255,0.42);
-  margin: 0;
-  line-height: 1.4;
-  border-left: 2px solid var(--bdr, rgba(167,139,250,0.40));
-  padding-left: 10px;
-}
 
 .lnd-card-cta {
   display: flex;
@@ -484,10 +474,6 @@
 }
 .lnd-card-name    { color: #ffffff !important; }
 .lnd-card-count   { color: rgba(255,255,255,0.55) !important; }
-.lnd-card-highlight {
-  color: rgba(255,255,255,0.60) !important;
-  border-left-color: rgba(255,255,255,0.25) !important;
-}
 .lnd-enter-hint   { color: rgba(255,255,255,0.40) !important; }
 .lnd-badge {
   background: rgba(255,255,255,0.10) !important;
@@ -610,12 +596,6 @@
 .lnd-pill {
   font-size: 14px !important;
   padding: 6px 16px !important;
-}
-.lnd-card-highlight {
-  font-size: 17px !important;
-  line-height: 1.6 !important;
-  padding-left: 16px !important;
-  border-left-width: 3px !important;
 }
 .lnd-card-cta {
   padding: 16px 22px !important;
@@ -836,10 +816,6 @@
 /* Card body text */
 [data-theme="light"] .lnd-card-name      { color: #1A1610 !important; }
 [data-theme="light"] .lnd-card-count     { color: rgba(26,22,16,0.55) !important; }
-[data-theme="light"] .lnd-card-highlight {
-  color: rgba(26,22,16,0.60) !important;
-  border-left-color: rgba(255,85,0,0.55) !important;
-}
 
 /* Status pills */
 [data-theme="light"] .lnd-pill--red    { background: rgba(220,38,38,0.08);  color: #C53030; border-color: rgba(220,38,38,0.28); }
