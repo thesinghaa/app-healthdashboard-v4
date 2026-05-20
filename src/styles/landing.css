@@ -1011,7 +1011,7 @@
 .lnd-ind-kd-gap { font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 600; flex-shrink: 0; margin-left: 6px; }
 
 /* ── Programme Grid ─────────────────────────────────────────────── */
-.lnd-prog-section { position: absolute; top: 360px; left: 64px; right: 300px; height: 370px; overflow: hidden; display: flex; flex-direction: column; }
+.lnd-prog-section { flex: 1; min-height: 180px; max-height: 340px; overflow: hidden; display: flex; flex-direction: column; }
 .lnd-prog-section-label { font-family: 'JetBrains Mono', monospace; font-size: 9px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(255,255,255,0.28); margin: 0 0 10px; flex-shrink: 0; }
 .lnd-prog-scroll { display: flex; gap: 16px; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; -ms-overflow-style: none; align-items: stretch; flex: 1; min-height: 0; }
 .lnd-prog-scroll::-webkit-scrollbar { display: none; }

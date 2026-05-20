@@ -183,7 +183,15 @@ export default function LandingPage({ onSelectDivision, onViewSummary, onDirectK
                 )}
               </div>
 
-              {/* Summary */}
+              {/* Active-only CTA bar — must be before CardSummary so prog section flex-grows below it */}
+              {isActive && (
+                <div className="lnd-card-cta">
+                  <span>Explore Division</span>
+                  <span className="lnd-cta-arrow">→</span>
+                </div>
+              )}
+
+              {/* Summary — prog section is a flex child, fills remaining space */}
               <Suspense fallback={<div className="lnd-summary-skeleton" />}>
                 <CardSummary
                   divisionId={div.id}
@@ -193,14 +201,6 @@ export default function LandingPage({ onSelectDivision, onViewSummary, onDirectK
                   onKDClick={(kd, programmeId) => onDirectKD && onDirectKD(div, programmeId, kd)}
                 />
               </Suspense>
-
-              {/* Active-only CTA bar */}
-              {isActive && (
-                <div className="lnd-card-cta">
-                  <span>Explore Division</span>
-                  <span className="lnd-cta-arrow">→</span>
-                </div>
-              )}
 
               {/* Glow ring (active only) */}
               {isActive && <div className="lnd-card-ring" />}
