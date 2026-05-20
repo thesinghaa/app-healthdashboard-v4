@@ -1008,8 +1008,51 @@
 .lnd-ind-leg-num { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; color: #ffffff; min-width: 20px; }
 .lnd-ind-leg-lbl { font-family: 'Inter', sans-serif; font-size: 11px; color: rgba(255,255,255,0.45); }
 .lnd-ind-top3 { margin-top: 14px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 12px; width: 100%; }
-.lnd-ind-cta { margin-top: auto; width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 11px 14px; background: rgba(0,181,204,0.08); border: 1px solid rgba(0,181,204,0.22); border-radius: 8px; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; color: #00b5cc; transition: background 0.18s, border-color 0.18s; flex-shrink: 0; }
-.lnd-ind-cta:hover { background: rgba(0,181,204,0.16); border-color: rgba(0,181,204,0.42); }
+@keyframes lnd-cta-shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+.lnd-ind-cta {
+  margin-top: auto;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: rgba(0,181,204,0.10);
+  border: 1.5px solid #00b5cc;
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #00b5cc;
+  letter-spacing: 0.03em;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+  transition: background 0.22s, box-shadow 0.22s;
+  box-shadow: 0 0 0 0 rgba(0,181,204,0);
+}
+/* shimmer sweep */
+.lnd-ind-cta::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 30%,
+    rgba(0,181,204,0.22) 50%,
+    transparent 70%
+  );
+  background-size: 200% 100%;
+  animation: lnd-cta-shimmer 2.4s linear infinite;
+  pointer-events: none;
+}
+.lnd-ind-cta:hover {
+  background: rgba(0,181,204,0.18);
+  box-shadow: 0 0 18px rgba(0,181,204,0.30), 0 0 4px rgba(0,181,204,0.20);
+}
 .lnd-ind-top3-header { font-family: 'JetBrains Mono', monospace; font-size: 8px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; margin-bottom: 8px; }
 .lnd-ind-kd-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 4px; cursor: pointer; border-radius: 4px; transition: background 0.15s; }
 .lnd-ind-kd-row:hover { background: rgba(255,255,255,0.06); }
