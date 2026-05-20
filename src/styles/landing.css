@@ -1004,11 +1004,10 @@
   margin-bottom: 12px;
 }
 
-/* ── Body: donut + stat col ─────────────────────────────────────── */
-.lnd-pc-body {
+/* ── Donut centered ─────────────────────────────────────────────── */
+.lnd-pc-donut-wrap {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  justify-content: center;
   margin-bottom: 12px;
 }
 
@@ -1040,20 +1039,20 @@
   margin-top: 2px;
 }
 
-/* ── Stat column ────────────────────────────────────────────────── */
-.lnd-pc-stat-col {
-  flex: 1;
+/* ── Stats list — full-width rows below donut ───────────────────── */
+.lnd-pc-stats-list {
   display: flex;
   flex-direction: column;
   gap: 0;
-  min-width: 0;
+  margin-bottom: 10px;
 }
 
-.lnd-pc-stat-row {
+.lnd-pc-stats-row {
   display: flex;
-  flex-direction: column;
-  gap: 1px;
+  justify-content: space-between;
+  align-items: center;
   padding: 5px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
 }
 
 .lnd-pc-stat-lbl {
@@ -1160,6 +1159,7 @@
 [data-theme="light"] .lnd-pc-stat--gap { color: #DC2626; }
 [data-theme="light"] .lnd-pc-stat--ok  { color: #047857; }
 [data-theme="light"] .lnd-pc-stat-sep  { background: rgba(26, 22, 16, 0.09); }
+[data-theme="light"] .lnd-pc-stats-row { border-bottom-color: rgba(26, 22, 16, 0.09); }
 
 [data-theme="light"] .lnd-pc-cta {
   background: rgba(255, 85, 0, 0.07);

@@ -11,6 +11,30 @@ function kdGap(kd) {
     : kd.achievement - kd.target;
 }
 
+/* Normalised 0-100 completion % — handles both count and % KDs */
+function kdAchievePct(kd) {
+  if (!kd) return 0;
+  /* Count-based KD: target is a large number, use numerator/denominator */
+  if (kd.target > 100 && kd.denominator > 0 && kd.numerator != null) {
+    return Math.min(100, Math.max(0, (kd.numerator / kd.denominator) * 100));
+  }
+  /* Percentage KD: achievement vs target */
+  if (kd.target > 0) {
+    return Math.min(100, Math.max(0, (kd.achievement / kd.target) * 100));
+  }
+  return 0;
+}
+
+/* Normalised gap for display (always in percentage points) */
+function kdDisplayGap(kd) {
+  if (!kd) return null;
+  if (kd.target > 100 && kd.denominator > 0 && kd.numerator != null) {
+    const pct = (kd.numerator / kd.denominator) * 100;
+    return kd.lowerIsBetter ? pct - 100 : pct - 100; // gap vs full coverage
+  }
+  return kdGap(kd); // raw %-point gap vs target
+}
+
 function getMostCriticalKD(divisionId) {
   const div = KD_TREE[divisionId];
   if (!div) return null;
@@ -54,6 +78,19 @@ const LAYOUT_BASE = {
   },
 };
 
+/* Short display value: always show as compact percentage */
+function shortVal(kd) {
+  if (!kd) return '—';
+  const pct = kdAchievePct(kd);
+  return `${pct.toFixed(1)}%`;
+}
+
+function shortTarget(kd) {
+  if (!kd) return '—';
+  if (kd.target > 100) return '100%'; // count-based: full coverage
+  return `${kd.target}${kd.unit}`;
+}
+
 /* ── component ──────────────────────────────────────────────────── */
 export default function CardSummary({ divisionId, stats, isActive, onKDClick }) {
   const criticalResult = useMemo(() => getMostCriticalKD(divisionId), [divisionId]);
@@ -64,13 +101,11 @@ export default function CardSummary({ divisionId, stats, isActive, onKDClick }) 
   const cardRef = useRef(null);
   const [displayPct, setDisplayPct] = useState(0);
 
-  const achievePct = criticalKD?.target > 0
-    ? Math.min(100, Math.max(0, (criticalKD.achievement / criticalKD.target) * 100))
-    : 0;
-  const gap = criticalKD ? kdGap(criticalKD) : null;
-  const isBelowTarget = gap !== null && gap < 0;
+  const achievePct    = useMemo(() => kdAchievePct(criticalKD), [criticalKD]);
+  const displayGap    = useMemo(() => kdDisplayGap(criticalKD), [criticalKD]);
+  const isBelowTarget = displayGap !== null && displayGap < 0;
 
-  /* ── GSAP: animate product card on becoming active ────────────── */
+  /* ── GSAP: slide-in + counter on active ───────────────────────── */
   useEffect(() => {
     if (!isActive || !cardRef.current) return;
     gsap.killTweensOf(cardRef.current);
@@ -85,36 +120,39 @@ export default function CardSummary({ divisionId, stats, isActive, onKDClick }) 
       duration: 0.85,
       delay: 0.18,
       ease: 'power2.out',
-      onUpdate: () => setDisplayPct(Math.round(obj.val)),
+      onUpdate: () => setDisplayPct(parseFloat(obj.val.toFixed(1))),
     });
   }, [isActive, achievePct]);
 
   useEffect(() => { if (!isActive) setDisplayPct(0); }, [isActive]);
 
-  /* ── Plotly: district perf donut (target vs achieved) ─────────── */
+  /* ── Plotly: target-vs-achieved donut ─────────────────────────── */
   const perfTrace = useMemo(() => [{
     type: 'pie',
     hole: 0.70,
     values: [Math.max(0.01, displayPct), Math.max(0, 100 - displayPct)],
     labels: ['Achieved', 'Gap'],
     marker: {
-      colors: ['#00b5cc', 'rgba(255,255,255,0.06)'],
+      colors: [
+        isBelowTarget ? '#f87171' : '#00b5cc',
+        'rgba(255,255,255,0.06)',
+      ],
       line: { color: 'rgba(0,0,0,0)', width: 0 },
     },
     textinfo: 'none',
-    hovertemplate: '<b>%{label}</b>: %{value:.0f}%<extra></extra>',
+    hovertemplate: '<b>%{label}</b>: %{value:.1f}%<extra></extra>',
     sort: false,
     direction: 'clockwise',
     rotation: -90,
-  }], [displayPct]);
+  }], [displayPct, isBelowTarget]);
 
   const perfLayout = useMemo(() => ({
     ...LAYOUT_BASE,
-    width: 148,
-    height: 148,
+    width: 140,
+    height: 140,
   }), []);
 
-  /* ── KD breakdown donut (left col) ────────────────────────────── */
+  /* ── KD breakdown donut ────────────────────────────────────────── */
   const kdDonutTrace = useMemo(() => [{
     type: 'pie',
     hole: 0.60,
@@ -135,7 +173,6 @@ export default function CardSummary({ divisionId, stats, isActive, onKDClick }) 
     height: 130,
   }), []);
 
-  /* ── ref label ─────────────────────────────────────────────────── */
   const refLabel = criticalKD
     ? (criticalKD.hmisCode ? `HMIS ${criticalKD.hmisCode}` : `KD-${String(criticalKD.no).padStart(2, '0')}`)
     : 'N/A';
@@ -217,9 +254,9 @@ export default function CardSummary({ divisionId, stats, isActive, onKDClick }) 
           <p className="lnd-pc-title">{criticalKD?.indicator || 'No data'}</p>
           <div className="lnd-pc-rule" />
 
-          {/* Donut + stats side-by-side */}
-          <div className="lnd-pc-body">
-            <div style={{ position: 'relative', width: 148, height: 148, flexShrink: 0 }}>
+          {/* Donut — centered */}
+          <div className="lnd-pc-donut-wrap">
+            <div style={{ position: 'relative', width: 140, height: 140, flexShrink: 0 }}>
               <Plot
                 data={perfTrace}
                 layout={perfLayout}
@@ -230,30 +267,25 @@ export default function CardSummary({ divisionId, stats, isActive, onKDClick }) 
                 <span className="lnd-pc-pct-lbl">of target</span>
               </div>
             </div>
+          </div>
 
-            <div className="lnd-pc-stat-col">
-              <div className="lnd-pc-stat-row">
-                <span className="lnd-pc-stat-lbl">Achievement</span>
-                <span className="lnd-pc-stat-val">
-                  {criticalKD?.achievement != null ? `${criticalKD.achievement}${criticalKD.unit}` : '—'}
-                </span>
-              </div>
-              <div className="lnd-pc-stat-sep" />
-              <div className="lnd-pc-stat-row">
-                <span className="lnd-pc-stat-lbl">Target</span>
-                <span className="lnd-pc-stat-val">
-                  {criticalKD?.target != null ? `${criticalKD.target}${criticalKD.unit}` : '—'}
-                </span>
-              </div>
-              <div className="lnd-pc-stat-sep" />
-              <div className="lnd-pc-stat-row">
-                <span className="lnd-pc-stat-lbl">Gap</span>
-                <span className={`lnd-pc-stat-val${isBelowTarget ? ' lnd-pc-stat--gap' : ' lnd-pc-stat--ok'}`}>
-                  {isBelowTarget
-                    ? `${Math.abs(gap).toFixed(1)}${criticalKD.unit} below`
-                    : 'On track'}
-                </span>
-              </div>
+          {/* Stats — full width rows below donut */}
+          <div className="lnd-pc-stats-list">
+            <div className="lnd-pc-stats-row">
+              <span className="lnd-pc-stat-lbl">Achievement</span>
+              <span className="lnd-pc-stat-val">{shortVal(criticalKD)}</span>
+            </div>
+            <div className="lnd-pc-stats-row">
+              <span className="lnd-pc-stat-lbl">Target</span>
+              <span className="lnd-pc-stat-val">{shortTarget(criticalKD)}</span>
+            </div>
+            <div className="lnd-pc-stats-row">
+              <span className="lnd-pc-stat-lbl">Gap</span>
+              <span className={`lnd-pc-stat-val${isBelowTarget ? ' lnd-pc-stat--gap' : ' lnd-pc-stat--ok'}`}>
+                {isBelowTarget
+                  ? `${Math.abs(displayGap).toFixed(1)}pp below`
+                  : 'On track'}
+              </span>
             </div>
           </div>
 
@@ -262,7 +294,7 @@ export default function CardSummary({ divisionId, stats, isActive, onKDClick }) 
             <span>VIEW INDICATOR</span>
             <span className="lnd-pc-cta-arrow">&#x2192;</span>
           </div>
-          <p className="lnd-pc-fine">Click to open full indicator breakdown</p>
+          <p className="lnd-pc-fine">Click to open full breakdown</p>
         </div>
 
       </div>
