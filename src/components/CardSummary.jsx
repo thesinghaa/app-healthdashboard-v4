@@ -314,8 +314,8 @@ export default function CardSummary({ divisionId, programmes = [], activeFilter,
             }];
             const progLayout = {
               ...LAYOUT_BASE,
-              width: 90,
-              height: 90,
+              width: 140,
+              height: 140,
             };
             const totalKDs = pb.gap + pb.close + pb.achieved;
             return (
@@ -325,7 +325,7 @@ export default function CardSummary({ divisionId, programmes = [], activeFilter,
                 style={progCardStyle}
               >
                 {/* Mini donut */}
-                <div style={{ position: 'relative', width: 90, height: 90, flexShrink: 0 }}>
+                <div style={{ position: 'relative', width: 140, height: 140, flexShrink: 0 }}>
                   <Plot
                     data={progTrace}
                     layout={progLayout}
