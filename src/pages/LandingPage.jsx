@@ -44,8 +44,12 @@ function cardStyle(offset) {
 }
 
 export default function LandingPage({ onSelectDivision, onViewSummary, onDirectKD }) {
-  const [active, setActive]   = useState(0);
-  const [locked, setLocked]   = useState(false);
+  const [active, setActive]     = useState(0);
+  const [locked, setLocked]     = useState(false);
+  const [activeFilter, setActiveFilter] = useState(null);
+
+  /* Reset filter whenever the active card changes */
+  useEffect(() => setActiveFilter(null), [active]);
 
   const go = useCallback((dir) => {
     if (locked) return;
@@ -130,6 +134,17 @@ export default function LandingPage({ onSelectDivision, onViewSummary, onDirectK
                 <span className="lnd-idx-num">#{String(idx + 1).padStart(2, '0')}</span>
                 <span className="lnd-idx-sep"> | </span>
                 <span className="lnd-idx-lbl">{div.label}</span>
+                {isActive && (
+                  <button
+                    className="lnd-idx-expand"
+                    onClick={(e) => { e.stopPropagation(); onSelectDivision(div); }}
+                    aria-label={`Open ${div.fullName}`}
+                  >
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                      <path d="M5 2.5h6.5V9M11.5 2.5L2.5 11.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </button>
+                )}
               </div>
               <div className="lnd-card-divider" />
 
@@ -140,17 +155,40 @@ export default function LandingPage({ onSelectDivision, onViewSummary, onDirectK
               {/* Programme count */}
               <p className="lnd-card-count">{stats.total} Programmes</p>
 
-              {/* Status pills */}
+              {/* Status pills — filter buttons */}
               <div className="lnd-card-status">
-                {stats.red    > 0 && <span className="lnd-pill lnd-pill--red">{stats.red} Critical</span>}
-                {stats.yellow > 0 && <span className="lnd-pill lnd-pill--yellow">{stats.yellow} Caution</span>}
-                {stats.green  > 0 && <span className="lnd-pill lnd-pill--green">{stats.green} On Track</span>}
+                {stats.red > 0 && (
+                  <button
+                    className={`lnd-pill lnd-pill--red${isActive && activeFilter === 'red' ? ' lnd-pill--sel' : ''}`}
+                    onClick={(e) => { e.stopPropagation(); if (isActive) setActiveFilter(f => f === 'red' ? null : 'red'); }}
+                  >
+                    {stats.red} Critical
+                  </button>
+                )}
+                {stats.yellow > 0 && (
+                  <button
+                    className={`lnd-pill lnd-pill--yellow${isActive && activeFilter === 'yellow' ? ' lnd-pill--sel' : ''}`}
+                    onClick={(e) => { e.stopPropagation(); if (isActive) setActiveFilter(f => f === 'yellow' ? null : 'yellow'); }}
+                  >
+                    {stats.yellow} Caution
+                  </button>
+                )}
+                {stats.green > 0 && (
+                  <button
+                    className={`lnd-pill lnd-pill--green${isActive && activeFilter === 'green' ? ' lnd-pill--sel' : ''}`}
+                    onClick={(e) => { e.stopPropagation(); if (isActive) setActiveFilter(f => f === 'green' ? null : 'green'); }}
+                  >
+                    {stats.green} On Track
+                  </button>
+                )}
               </div>
 
               {/* Summary */}
               <Suspense fallback={<div className="lnd-summary-skeleton" />}>
                 <CardSummary
                   divisionId={div.id}
+                  programmes={div.programs}
+                  activeFilter={isActive ? activeFilter : null}
                   isActive={isActive}
                   onKDClick={(kd, programmeId) => onDirectKD && onDirectKD(div, programmeId, kd)}
                 />

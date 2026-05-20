@@ -11,41 +11,73 @@ function kdGap(kd) {
     : kd.achievement - kd.target;
 }
 
-/* Normalised 0-100 completion % — handles both count and % KDs */
-function kdAchievePct(kd) {
-  if (!kd) return 0;
-  if (kd.target > 100 && kd.denominator > 0 && kd.numerator != null) {
-    return Math.min(100, Math.max(0, (kd.numerator / kd.denominator) * 100));
-  }
-  if (kd.target > 0) {
-    return Math.min(100, Math.max(0, (kd.achievement / kd.target) * 100));
-  }
-  return 0;
-}
-
-/* Normalised gap for display (always in percentage points) */
-function kdDisplayGap(kd) {
-  if (!kd) return null;
-  if (kd.target > 100 && kd.denominator > 0 && kd.numerator != null) {
-    const pct = (kd.numerator / kd.denominator) * 100;
-    return pct - 100;
-  }
-  return kdGap(kd);
-}
-
-function getMostCriticalKD(divisionId) {
+function getDivKDBreakdown(divisionId) {
   const div = KD_TREE[divisionId];
-  if (!div) return null;
-  let worst = null, worstGap = Infinity, worstProgId = null;
+  if (!div) return { achieved: 0, close: 0, gap: 0, total: 0 };
+  let achieved = 0, close = 0, gap = 0, total = 0;
+  Object.values(div.programmes || {}).forEach(prog => {
+    (prog.kds || []).forEach(kd => {
+      const g = kdGap(kd);
+      if (g === null) return;
+      total++;
+      if (g >= 0)   achieved++;
+      else if (g >= -10) close++;
+      else          gap++;
+    });
+  });
+  return { achieved, close, gap, total };
+}
+
+function getTopKDsByStatus(divisionId, status, n = 3) {
+  const div = KD_TREE[divisionId];
+  if (!div) return [];
+  const results = [];
   Object.entries(div.programmes || {}).forEach(([progId, prog]) => {
     (prog.kds || []).forEach(kd => {
       const g = kdGap(kd);
       if (g === null) return;
-      if (g < worstGap) { worstGap = g; worst = kd; worstProgId = progId; }
+      let matches = false;
+      if (status === 'achieved' && g >= 0)    matches = true;
+      if (status === 'close'    && g >= -10 && g < 0) matches = true;
+      if (status === 'gap'      && g < -10)   matches = true;
+      if (matches) results.push({ ...kd, programmeId: progId, _gap: g });
     });
   });
-  return worst ? { kd: worst, programmeId: worstProgId } : null;
+  results.sort((a, b) => {
+    if (status === 'gap')      return a._gap - b._gap;       // most negative first
+    if (status === 'close')    return Math.abs(a._gap) - Math.abs(b._gap); // closest to 0
+    return b._gap - a._gap;                                   // highest first
+  });
+  return results.slice(0, n);
 }
+
+function getProgKDBrk(divisionId, progId) {
+  const div = KD_TREE[divisionId];
+  if (!div) return { achieved: 0, close: 0, gap: 0 };
+  const prog = (div.programmes || {})[progId];
+  if (!prog) return { achieved: 0, close: 0, gap: 0 };
+  let achieved = 0, close = 0, gap = 0;
+  (prog.kds || []).forEach(kd => {
+    const g = kdGap(kd);
+    if (g === null) return;
+    if (g >= 0)        achieved++;
+    else if (g >= -10) close++;
+    else               gap++;
+  });
+  return { achieved, close, gap };
+}
+
+const SEG_COLORS = {
+  gap:      '#f87171',
+  close:    '#fbbf24',
+  achieved: '#34d399',
+};
+
+const SEG_LABELS = {
+  gap:      'Critical',
+  close:    'Caution',
+  achieved: 'On Track',
+};
 
 const LAYOUT_BASE = {
   paper_bgcolor: 'rgba(0,0,0,0)',
@@ -55,150 +87,265 @@ const LAYOUT_BASE = {
   hoverlabel: {
     bgcolor: 'rgba(5,7,18,0.96)',
     bordercolor: 'rgba(0,181,204,0.40)',
-    font: { color: '#ffffff', size: 12, family: 'JetBrains Mono' },
+    font: { color: '#ffffff', size: 11, family: 'JetBrains Mono' },
   },
 };
 
-function shortVal(kd) {
-  if (!kd) return '—';
-  return `${kdAchievePct(kd).toFixed(1)}%`;
-}
-
-function shortTarget(kd) {
-  if (!kd) return '—';
-  if (kd.target > 100) return '100%';
-  return `${kd.target}${kd.unit}`;
-}
-
 /* ── component ──────────────────────────────────────────────────── */
-export default function CardSummary({ divisionId, isActive, onKDClick }) {
-  const criticalResult = useMemo(() => getMostCriticalKD(divisionId), [divisionId]);
-  const criticalKD     = criticalResult?.kd;
-  const programmeId    = criticalResult?.programmeId;
+export default function CardSummary({ divisionId, programmes = [], activeFilter, isActive, onKDClick }) {
+  const [selectedSeg, setSelectedSeg] = useState(null);
+  const top3Ref = useRef(null);
 
-  const cardRef = useRef(null);
-  const [displayPct, setDisplayPct] = useState(0);
-
-  const achievePct    = useMemo(() => kdAchievePct(criticalKD), [criticalKD]);
-  const displayGap    = useMemo(() => kdDisplayGap(criticalKD), [criticalKD]);
-  const isBelowTarget = displayGap !== null && displayGap < 0;
-
-  /* ── GSAP: slide-in + counter on active ───────────────────────── */
+  /* Reset selectedSeg when card goes inactive */
   useEffect(() => {
-    if (!isActive || !cardRef.current) return;
-    gsap.killTweensOf(cardRef.current);
+    if (!isActive) setSelectedSeg(null);
+  }, [isActive]);
+
+  /* GSAP: animate top-3 panel in when selectedSeg becomes non-null */
+  useEffect(() => {
+    if (!selectedSeg || !top3Ref.current) return;
     gsap.fromTo(
-      cardRef.current,
-      { x: 28, opacity: 0, scale: 0.93 },
-      { x: 0, opacity: 1, scale: 1, duration: 0.52, ease: 'power3.out', delay: 0.08 },
+      top3Ref.current,
+      { opacity: 0, y: -8 },
+      { opacity: 1, y: 0, duration: 0.28, ease: 'power2.out' },
     );
-    const obj = { val: 0 };
-    gsap.to(obj, {
-      val: achievePct,
-      duration: 0.85,
-      delay: 0.18,
-      ease: 'power2.out',
-      onUpdate: () => setDisplayPct(parseFloat(obj.val.toFixed(1))),
-    });
-  }, [isActive, achievePct]);
+  }, [selectedSeg]);
 
-  useEffect(() => { if (!isActive) setDisplayPct(0); }, [isActive]);
+  /* ── division-level KD breakdown ───────────────────────────── */
+  const brk = useMemo(() => getDivKDBreakdown(divisionId), [divisionId]);
 
-  /* ── Plotly: target-vs-achieved donut ─────────────────────────── */
-  const perfTrace = useMemo(() => [{
+  /* ── indicator status donut traces ─────────────────────────── */
+  const indTrace = useMemo(() => [{
     type: 'pie',
-    hole: 0.70,
-    values: [Math.max(0.01, displayPct), Math.max(0, 100 - displayPct)],
-    labels: ['Achieved', 'Gap'],
+    hole: 0.65,
+    values: [
+      Math.max(0.01, brk.gap),
+      Math.max(0.01, brk.close),
+      Math.max(0.01, brk.achieved),
+    ],
+    labels: ['Gap', 'Close', 'Achieved'],
     marker: {
-      colors: [
-        isBelowTarget ? '#f87171' : '#00b5cc',
-        'rgba(255,255,255,0.06)',
-      ],
+      colors: [SEG_COLORS.gap, SEG_COLORS.close, SEG_COLORS.achieved],
       line: { color: 'rgba(0,0,0,0)', width: 0 },
     },
     textinfo: 'none',
-    hovertemplate: '<b>%{label}</b>: %{value:.1f}%<extra></extra>',
+    hovertemplate: '<b>%{label}</b>: %{value}<extra></extra>',
     sort: false,
     direction: 'clockwise',
     rotation: -90,
-  }], [displayPct, isBelowTarget]);
+  }], [brk]);
 
-  const perfLayout = useMemo(() => ({
+  const indLayout = useMemo(() => ({
     ...LAYOUT_BASE,
-    width: 140,
-    height: 140,
+    width: 120,
+    height: 120,
   }), []);
 
-  const refLabel = criticalKD
-    ? (criticalKD.hmisCode ? `HMIS ${criticalKD.hmisCode}` : `KD-${String(criticalKD.no).padStart(2, '0')}`)
-    : 'N/A';
+  /* ── top-3 KDs for selected segment ────────────────────────── */
+  const top3 = useMemo(() => {
+    if (!selectedSeg) return [];
+    return getTopKDsByStatus(divisionId, selectedSeg);
+  }, [divisionId, selectedSeg]);
+
+  /* ── Plotly pie click handler ───────────────────────────────── */
+  function handleIndClick(data) {
+    if (!isActive) return;
+    const labelRaw = data.points[0]?.label;
+    const map = { Achieved: 'achieved', Close: 'close', Gap: 'gap' };
+    const seg = map[labelRaw];
+    if (!seg) return;
+    setSelectedSeg(prev => prev === seg ? null : seg);
+  }
+
+  /* ── resolved filter for programme grid ────────────────────── */
+  const resolvedFilter = useMemo(() => {
+    if (activeFilter) return activeFilter;
+    if (programmes.some(p => p.status === 'red'))    return 'red';
+    if (programmes.some(p => p.status === 'yellow')) return 'yellow';
+    return 'green';
+  }, [activeFilter, programmes]);
+
+  const filteredProgs = useMemo(
+    () => programmes.filter(p => p.status === resolvedFilter),
+    [programmes, resolvedFilter],
+  );
+
+  const n = filteredProgs.length;
+  const progCardStyle = n > 0 && n <= 4 ? { flex: 1, minWidth: 0 } : { width: '220px', flexShrink: 0 };
+
+  /* ── section label text ─────────────────────────────────────── */
+  const sectionLabel =
+    resolvedFilter === 'red'    ? 'CRITICAL PROGRAMMES' :
+    resolvedFilter === 'yellow' ? 'CAUTION PROGRAMMES'  :
+    'ON TRACK PROGRAMMES';
+
+  /* ── gap display per KD ─────────────────────────────────────── */
+  function gapLabel(kd) {
+    const g = kdGap(kd);
+    if (g === null) return '—';
+    if (g >= 0) return 'On track';
+    return `${Math.abs(g).toFixed(0)}pp`;
+  }
+
+  function gapColor(kd) {
+    const g = kdGap(kd);
+    if (g === null) return 'rgba(255,255,255,0.40)';
+    if (g >= 0)    return SEG_COLORS.achieved;
+    if (g >= -10)  return SEG_COLORS.close;
+    return SEG_COLORS.gap;
+  }
+
+  /* ── top-3 header label ─────────────────────────────────────── */
+  const top3HeaderColor =
+    selectedSeg === 'gap'      ? SEG_COLORS.gap :
+    selectedSeg === 'close'    ? SEG_COLORS.close :
+    selectedSeg === 'achieved' ? SEG_COLORS.achieved :
+    'rgba(255,255,255,0.45)';
+
+  const top3HeaderText =
+    selectedSeg === 'gap'      ? 'TOP CRITICAL' :
+    selectedSeg === 'close'    ? 'TOP CAUTION'  :
+    'TOP ON TRACK';
 
   return (
-    <div className="lnd-summary">
-      <div
-        ref={cardRef}
-        className={`lnd-perf-card${isBelowTarget ? ' lnd-perf-card--crit' : ''}`}
-        style={{ opacity: isActive ? undefined : 0, pointerEvents: isActive ? 'auto' : 'none' }}
-        onClick={(e) => {
-          e.stopPropagation();
-          if (criticalKD && onKDClick) onKDClick(criticalKD, programmeId);
-        }}
-        role="button"
-        tabIndex={isActive ? 0 : -1}
-        aria-label={`View indicator: ${criticalKD?.indicator}`}
-      >
-        {/* Header */}
-        <div className="lnd-pc-header">
-          <span className="lnd-pc-cat">DISTRICT PERFORMANCE</span>
-          <span className="lnd-pc-dot" />
-          <span className="lnd-pc-ref">{refLabel}</span>
+    <>
+      {/* ── INDICATOR STATUS CARD ──────────────────────────────── */}
+      <div className="lnd-ind-card">
+        <div className="lnd-ind-header">
+          <span className="lnd-ind-title">INDICATOR STATUS</span>
         </div>
-        <p className="lnd-pc-title">{criticalKD?.indicator || 'No data'}</p>
-        <div className="lnd-pc-rule" />
 
-        {/* Donut — centered */}
-        <div className="lnd-pc-donut-wrap">
-          <div style={{ position: 'relative', width: 140, height: 140, flexShrink: 0 }}>
-            <Plot
-              data={perfTrace}
-              layout={perfLayout}
-              config={{ displayModeBar: false, responsive: false }}
-            />
-            <div className="lnd-pc-donut-center">
-              <span className="lnd-pc-pct">{displayPct}%</span>
-              <span className="lnd-pc-pct-lbl">of target</span>
+        {/* Donut */}
+        <div style={{ position: 'relative', width: 120, height: 120, margin: '0 auto' }}>
+          <Plot
+            data={indTrace}
+            layout={indLayout}
+            config={{ displayModeBar: false, responsive: false }}
+            onClick={isActive ? handleIndClick : undefined}
+          />
+          <div className="lnd-ind-center">
+            <span className="lnd-ind-total-num">{brk.total}</span>
+            <span className="lnd-ind-total-lbl">KDs</span>
+          </div>
+        </div>
+
+        {/* Legend rows */}
+        <div className="lnd-ind-legend">
+          {(['gap', 'close', 'achieved']).map(seg => {
+            const count = brk[seg];
+            const isRowActive = selectedSeg === seg;
+            return (
+              <div
+                key={seg}
+                className={`lnd-ind-leg-row${isRowActive ? ' lnd-ind-leg-row--active' : ''}${isActive ? '' : ''}`}
+                style={{ cursor: isActive ? 'pointer' : 'default' }}
+                onClick={(e) => {
+                  if (!isActive) return;
+                  e.stopPropagation();
+                  setSelectedSeg(prev => prev === seg ? null : seg);
+                }}
+              >
+                <span className="lnd-ind-leg-dot" style={{ background: SEG_COLORS[seg] }} />
+                <span className="lnd-ind-leg-num">{count}</span>
+                <span className="lnd-ind-leg-lbl">{SEG_LABELS[seg]}</span>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Top-3 panel */}
+        {selectedSeg && (
+          <div ref={top3Ref} className="lnd-ind-top3" style={{ opacity: 0 }}>
+            <div
+              className="lnd-ind-top3-header"
+              style={{ color: top3HeaderColor }}
+            >
+              {top3HeaderText}
             </div>
+            {top3.map((kd, i) => (
+              <div
+                key={i}
+                className="lnd-ind-kd-row"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (onKDClick) onKDClick(kd, kd.programmeId);
+                }}
+              >
+                <span className="lnd-ind-kd-name">{kd.indicator}</span>
+                <span
+                  className="lnd-ind-kd-gap"
+                  style={{ color: gapColor(kd) }}
+                >
+                  {gapLabel(kd)}
+                </span>
+              </div>
+            ))}
           </div>
-        </div>
-
-        {/* Stats — full width rows below donut */}
-        <div className="lnd-pc-stats-list">
-          <div className="lnd-pc-stats-row">
-            <span className="lnd-pc-stat-lbl">Achievement</span>
-            <span className="lnd-pc-stat-val">{shortVal(criticalKD)}</span>
-          </div>
-          <div className="lnd-pc-stats-row">
-            <span className="lnd-pc-stat-lbl">Target</span>
-            <span className="lnd-pc-stat-val">{shortTarget(criticalKD)}</span>
-          </div>
-          <div className="lnd-pc-stats-row">
-            <span className="lnd-pc-stat-lbl">Gap</span>
-            <span className={`lnd-pc-stat-val${isBelowTarget ? ' lnd-pc-stat--gap' : ' lnd-pc-stat--ok'}`}>
-              {isBelowTarget
-                ? `${Math.abs(displayGap).toFixed(1)}pp below`
-                : 'On track'}
-            </span>
-          </div>
-        </div>
-
-        {/* CTA */}
-        <div className="lnd-pc-cta">
-          <span>VIEW INDICATOR</span>
-          <span className="lnd-pc-cta-arrow">&#x2192;</span>
-        </div>
-        <p className="lnd-pc-fine">Click to open full breakdown</p>
+        )}
       </div>
-    </div>
+
+      {/* ── PROGRAMME GRID ─────────────────────────────────────── */}
+      <div className="lnd-prog-section">
+        <p className="lnd-prog-section-label">{sectionLabel}</p>
+        <div className="lnd-prog-scroll">
+          {filteredProgs.length === 0 && (
+            <p className="lnd-prog-empty">No programmes</p>
+          )}
+          {filteredProgs.map(prog => {
+            const pb = getProgKDBrk(divisionId, prog.id);
+            const progTrace = [{
+              type: 'pie',
+              hole: 0.65,
+              values: [
+                Math.max(0.01, pb.gap),
+                Math.max(0.01, pb.close),
+                Math.max(0.01, pb.achieved),
+              ],
+              labels: ['Gap', 'Close', 'Achieved'],
+              marker: {
+                colors: [SEG_COLORS.gap, SEG_COLORS.close, SEG_COLORS.achieved],
+                line: { color: 'rgba(0,0,0,0)', width: 0 },
+              },
+              textinfo: 'none',
+              hoverinfo: 'none',
+              sort: false,
+              direction: 'clockwise',
+              rotation: -90,
+            }];
+            const progLayout = {
+              ...LAYOUT_BASE,
+              width: 90,
+              height: 90,
+            };
+            const totalKDs = pb.gap + pb.close + pb.achieved;
+            return (
+              <div
+                key={prog.id}
+                className="lnd-prog-card"
+                style={progCardStyle}
+              >
+                {/* Mini donut */}
+                <div style={{ position: 'relative', width: 90, height: 90, flexShrink: 0 }}>
+                  <Plot
+                    data={progTrace}
+                    layout={progLayout}
+                    config={{ displayModeBar: false, responsive: false }}
+                  />
+                  <div className="lnd-prog-donut-center">
+                    <span>{totalKDs}</span>
+                    <span className="lnd-prog-dc-lbl">KDs</span>
+                  </div>
+                </div>
+
+                <p className="lnd-prog-name">{prog.label || prog.name}</p>
+                {prog.keyMetric && (
+                  <p className="lnd-prog-metric">{prog.keyMetric}</p>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </>
   );
 }
