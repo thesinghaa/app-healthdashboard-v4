@@ -501,8 +501,8 @@
   border-left:   1px solid rgba(255,255,255,0.08) !important;
   border-radius: 12px 12px 0 0 !important;
   box-shadow: none !important;
-  padding: 56px 300px calc(14px + 56px) 64px !important;
-  gap: 22px !important;
+  padding: 40px 300px calc(14px + 40px) 64px !important;
+  gap: 16px !important;
   clip-path: polygon(
     0% 0%, 100% 0%,
     100% calc(100% - 14px), 97.5% 100%, 95% calc(100% - 14px), 92.5% 100%, 90% calc(100% - 14px), 87.5% 100%,
@@ -988,7 +988,7 @@
   border: 1.5px solid rgba(0, 181, 204, 0.50);
   border-radius: 14px;
   box-shadow: 0 0 0 1px rgba(0,181,204,0.08) inset, 0 0 32px rgba(0,181,204,0.08);
-  padding: 52px 22px 36px;
+  padding: 36px 22px 28px;
   display: flex;
   flex-direction: column;
   align-items: center;
