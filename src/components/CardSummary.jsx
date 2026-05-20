@@ -95,6 +95,11 @@ const LAYOUT_BASE = {
 export default function CardSummary({ divisionId, programmes = [], activeFilter, isActive, onKDClick, onExploreDivision }) {
   const [selectedSeg, setSelectedSeg] = useState(null);
   const top3Ref = useRef(null);
+  const indDonutRef = useRef(null);
+  const totalNumRef = useRef(null);
+  const legNumRefs = useRef([null, null, null]);
+  const progDonutRefs = useRef([]);
+  const progNumRefs = useRef([]);
 
   /* ── division-level KD breakdown ───────────────────────────── */
   const brk = useMemo(() => getDivKDBreakdown(divisionId), [divisionId]);
@@ -119,6 +124,62 @@ export default function CardSummary({ divisionId, programmes = [], activeFilter,
       { opacity: 1, y: 0, duration: 0.28, ease: 'power2.out' },
     );
   }, [selectedSeg]);
+
+  /* GSAP: entrance animations on card activate */
+  useEffect(() => {
+    if (!isActive) return;
+
+    // Indicator donut — scale + rotate in
+    if (indDonutRef.current) {
+      gsap.fromTo(indDonutRef.current,
+        { scale: 0.72, opacity: 0, rotate: -12 },
+        { scale: 1, opacity: 1, rotate: 0, duration: 0.55, ease: 'back.out(1.4)', delay: 0.05 },
+      );
+    }
+
+    // Total KD counter
+    if (totalNumRef.current) {
+      const obj = { val: 0 };
+      gsap.to(obj, {
+        val: brk.total, duration: 0.9, ease: 'power3.out', delay: 0.12,
+        onUpdate() { if (totalNumRef.current) totalNumRef.current.textContent = Math.round(obj.val); },
+      });
+    }
+
+    // Legend number counters — staggered
+    const segs = ['gap', 'close', 'achieved'];
+    segs.forEach((seg, i) => {
+      const el = legNumRefs.current[i];
+      if (!el) return;
+      const obj = { val: 0 };
+      gsap.to(obj, {
+        val: brk[seg], duration: 0.75, ease: 'power2.out', delay: 0.22 + i * 0.07,
+        onUpdate() { if (el) el.textContent = Math.round(obj.val); },
+      });
+    });
+  }, [isActive]);
+
+  /* GSAP: prog card donut entrances — staggered, runs on activate or filter change */
+  useEffect(() => {
+    if (!isActive) return;
+    progDonutRefs.current.forEach((el, i) => {
+      if (!el) return;
+      gsap.fromTo(el,
+        { scale: 0.6, opacity: 0 },
+        { scale: 1, opacity: 1, duration: 0.42, ease: 'back.out(1.3)', delay: 0.08 + i * 0.08 },
+      );
+    });
+    progNumRefs.current.forEach((el, i) => {
+      if (!el) return;
+      const pb = getProgKDBrk(divisionId, filteredProgs[i]?.id);
+      const target = pb.gap + pb.close + pb.achieved;
+      const obj = { val: 0 };
+      gsap.to(obj, {
+        val: target, duration: 0.7, ease: 'power2.out', delay: 0.18 + i * 0.08,
+        onUpdate() { if (el) el.textContent = Math.round(obj.val); },
+      });
+    });
+  }, [isActive, filteredProgs]);
 
   /* ── indicator status donut traces ─────────────────────────── */
   const indTrace = useMemo(() => [{
@@ -222,7 +283,7 @@ export default function CardSummary({ divisionId, programmes = [], activeFilter,
         </div>
 
         {/* Donut */}
-        <div style={{ position: 'relative', width: 160, height: 160, margin: '0 auto' }}>
+        <div ref={indDonutRef} style={{ position: 'relative', width: 160, height: 160, margin: '0 auto' }}>
           <Plot
             data={indTrace}
             layout={indLayout}
@@ -230,7 +291,7 @@ export default function CardSummary({ divisionId, programmes = [], activeFilter,
             onClick={isActive ? handleIndClick : undefined}
           />
           <div className="lnd-ind-center">
-            <span className="lnd-ind-total-num">{brk.total}</span>
+            <span ref={totalNumRef} className="lnd-ind-total-num">{brk.total}</span>
             <span className="lnd-ind-total-lbl">KDs</span>
           </div>
         </div>
@@ -252,7 +313,7 @@ export default function CardSummary({ divisionId, programmes = [], activeFilter,
                 }}
               >
                 <span className="lnd-ind-leg-dot" style={{ background: SEG_COLORS[seg] }} />
-                <span className="lnd-ind-leg-num">{count}</span>
+                <span ref={el => { legNumRefs.current[['gap','close','achieved'].indexOf(seg)] = el; }} className="lnd-ind-leg-num">{count}</span>
                 <span className="lnd-ind-leg-lbl">{SEG_LABELS[seg]}</span>
               </div>
             );
@@ -308,7 +369,7 @@ export default function CardSummary({ divisionId, programmes = [], activeFilter,
           {filteredProgs.length === 0 && (
             <p className="lnd-prog-empty">No programmes</p>
           )}
-          {filteredProgs.map(prog => {
+          {filteredProgs.map((prog, i) => {
             const pb = getProgKDBrk(divisionId, prog.id);
             const progTrace = [{
               type: 'pie',
@@ -342,14 +403,14 @@ export default function CardSummary({ divisionId, programmes = [], activeFilter,
                 style={progCardStyle}
               >
                 {/* Mini donut */}
-                <div style={{ position: 'relative', width: 140, height: 140, flexShrink: 0 }}>
+                <div ref={el => { progDonutRefs.current[i] = el; }} style={{ position: 'relative', width: 140, height: 140, flexShrink: 0 }}>
                   <Plot
                     data={progTrace}
                     layout={progLayout}
                     config={{ displayModeBar: false, responsive: false }}
                   />
                   <div className="lnd-prog-donut-center">
-                    <span>{totalKDs}</span>
+                    <span ref={el => { progNumRefs.current[i] = el; }}>{totalKDs}</span>
                     <span className="lnd-prog-dc-lbl">KDs</span>
                   </div>
                 </div>
