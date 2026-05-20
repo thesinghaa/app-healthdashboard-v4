@@ -96,10 +96,16 @@ export default function CardSummary({ divisionId, programmes = [], activeFilter,
   const [selectedSeg, setSelectedSeg] = useState(null);
   const top3Ref = useRef(null);
 
-  /* Reset selectedSeg when card goes inactive */
+  /* Auto-select most critical segment when card becomes active; clear when inactive */
   useEffect(() => {
-    if (!isActive) setSelectedSeg(null);
-  }, [isActive]);
+    if (!isActive) {
+      setSelectedSeg(null);
+    } else {
+      if (brk.gap > 0)        setSelectedSeg('gap');
+      else if (brk.close > 0) setSelectedSeg('close');
+      else                    setSelectedSeg('achieved');
+    }
+  }, [isActive, brk]);
 
   /* GSAP: animate top-3 panel in when selectedSeg becomes non-null */
   useEffect(() => {
