@@ -96,6 +96,9 @@ export default function CardSummary({ divisionId, programmes = [], activeFilter,
   const [selectedSeg, setSelectedSeg] = useState(null);
   const top3Ref = useRef(null);
 
+  /* ── division-level KD breakdown ───────────────────────────── */
+  const brk = useMemo(() => getDivKDBreakdown(divisionId), [divisionId]);
+
   /* Auto-select most critical segment when card becomes active; clear when inactive */
   useEffect(() => {
     if (!isActive) {
@@ -105,7 +108,7 @@ export default function CardSummary({ divisionId, programmes = [], activeFilter,
       else if (brk.close > 0) setSelectedSeg('close');
       else                    setSelectedSeg('achieved');
     }
-  }, [isActive, brk]);
+  }, [isActive, brk.gap, brk.close, brk.achieved]);
 
   /* GSAP: animate top-3 panel in when selectedSeg becomes non-null */
   useEffect(() => {
@@ -116,9 +119,6 @@ export default function CardSummary({ divisionId, programmes = [], activeFilter,
       { opacity: 1, y: 0, duration: 0.28, ease: 'power2.out' },
     );
   }, [selectedSeg]);
-
-  /* ── division-level KD breakdown ───────────────────────────── */
-  const brk = useMemo(() => getDivKDBreakdown(divisionId), [divisionId]);
 
   /* ── indicator status donut traces ─────────────────────────── */
   const indTrace = useMemo(() => [{
