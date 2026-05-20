@@ -104,6 +104,27 @@ export default function CardSummary({ divisionId, programmes = [], activeFilter,
   /* ── division-level KD breakdown ───────────────────────────── */
   const brk = useMemo(() => getDivKDBreakdown(divisionId), [divisionId]);
 
+  /* ── resolved filter + filtered progs — must be before effects ── */
+  const resolvedFilter = useMemo(() => {
+    if (activeFilter) return activeFilter;
+    if (programmes.some(p => p.status === 'red'))    return 'red';
+    if (programmes.some(p => p.status === 'yellow')) return 'yellow';
+    return 'green';
+  }, [activeFilter, programmes]);
+
+  const filteredProgs = useMemo(
+    () => programmes.filter(p => p.status === resolvedFilter),
+    [programmes, resolvedFilter],
+  );
+
+  const n = filteredProgs.length;
+  const progCardStyle = n > 0 && n <= 4 ? { flex: 1, minWidth: 0 } : { width: '220px', flexShrink: 0 };
+
+  const sectionLabel =
+    resolvedFilter === 'red'    ? 'CRITICAL PROGRAMMES' :
+    resolvedFilter === 'yellow' ? 'CAUTION PROGRAMMES'  :
+    'ON TRACK PROGRAMMES';
+
   /* Auto-select most critical segment when card becomes active; clear when inactive */
   useEffect(() => {
     if (!isActive) {
@@ -223,28 +244,6 @@ export default function CardSummary({ divisionId, programmes = [], activeFilter,
     if (!seg) return;
     setSelectedSeg(prev => prev === seg ? null : seg);
   }
-
-  /* ── resolved filter for programme grid ────────────────────── */
-  const resolvedFilter = useMemo(() => {
-    if (activeFilter) return activeFilter;
-    if (programmes.some(p => p.status === 'red'))    return 'red';
-    if (programmes.some(p => p.status === 'yellow')) return 'yellow';
-    return 'green';
-  }, [activeFilter, programmes]);
-
-  const filteredProgs = useMemo(
-    () => programmes.filter(p => p.status === resolvedFilter),
-    [programmes, resolvedFilter],
-  );
-
-  const n = filteredProgs.length;
-  const progCardStyle = n > 0 && n <= 4 ? { flex: 1, minWidth: 0 } : { width: '220px', flexShrink: 0 };
-
-  /* ── section label text ─────────────────────────────────────── */
-  const sectionLabel =
-    resolvedFilter === 'red'    ? 'CRITICAL PROGRAMMES' :
-    resolvedFilter === 'yellow' ? 'CAUTION PROGRAMMES'  :
-    'ON TRACK PROGRAMMES';
 
   /* ── gap display per KD ─────────────────────────────────────── */
   function gapLabel(kd) {
