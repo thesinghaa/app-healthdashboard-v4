@@ -89,12 +89,7 @@ export default function LandingPage({ onSelectDivision, onViewSummary, onDirectK
             <span className="lnd-brand-sub">NHM Health Dashboard</span>
           </div>
 
-          {/* Centre label */}
-          <div className="lnd-header-centre">
-            <span className="lnd-header-label">Select a Division</span>
-          </div>
-
-          {/* Summary CTA + theme toggle */}
+{/* Summary CTA + theme toggle */}
           <div className="lnd-header-right">
             <ThemeToggle />
             <button className="lnd-summary-btn" onClick={onViewSummary}>
