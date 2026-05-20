@@ -68,9 +68,15 @@ function getProgKDBrk(divisionId, progId) {
 }
 
 const SEG_COLORS = {
-  gap:      '#f87171',
-  close:    '#fbbf24',
-  achieved: '#34d399',
+  gap:      '#E84060',
+  close:    '#E89010',
+  achieved: '#28C268',
+};
+
+const SEG_GLOW = {
+  gap:      'rgba(232,64,96,',
+  close:    'rgba(232,144,16,',
+  achieved: 'rgba(40,194,104,',
 };
 
 const SEG_LABELS = {
@@ -227,6 +233,13 @@ export default function CardSummary({ divisionId, programmes = [], activeFilter,
     });
   }, [isActive, filteredProgs]);
 
+  /* ── dominant segment glow for indicator donut ─────────────── */
+  const indGlow = useMemo(() => {
+    if (brk.gap >= brk.close && brk.gap >= brk.achieved) return 'gap';
+    if (brk.close >= brk.achieved) return 'close';
+    return 'achieved';
+  }, [brk]);
+
   /* ── indicator status donut traces ─────────────────────────── */
   const indTrace = useMemo(() => [{
     type: 'pie',
@@ -239,7 +252,10 @@ export default function CardSummary({ divisionId, programmes = [], activeFilter,
     labels: ['Gap', 'Close', 'Achieved'],
     marker: {
       colors: [SEG_COLORS.gap, SEG_COLORS.close, SEG_COLORS.achieved],
-      line: { color: 'rgba(0,0,0,0)', width: 0 },
+      line: {
+        color: [SEG_COLORS.gap, SEG_COLORS.close, SEG_COLORS.achieved],
+        width: 2.5,
+      },
     },
     textinfo: 'none',
     hovertemplate: '<b>%{label}</b>: %{value}<extra></extra>',
@@ -307,7 +323,7 @@ export default function CardSummary({ divisionId, programmes = [], activeFilter,
         </div>
 
         {/* Donut */}
-        <div ref={indDonutRef} style={{ position: 'relative', width: 160, height: 160, margin: '0 auto' }}>
+        <div ref={indDonutRef} style={{ position: 'relative', width: 160, height: 160, margin: '0 auto', filter: `drop-shadow(0 0 18px ${SEG_GLOW[indGlow]}0.35)) drop-shadow(0 0 7px ${SEG_GLOW[indGlow]}0.55))` }}>
           <Plot
             data={indTrace}
             layout={indLayout}
@@ -395,6 +411,7 @@ export default function CardSummary({ divisionId, programmes = [], activeFilter,
           )}
           {filteredProgs.map((prog, i) => {
             const pb = getProgKDBrk(divisionId, prog.id);
+            const progGlowSeg = pb.gap >= pb.close && pb.gap >= pb.achieved ? 'gap' : pb.close >= pb.achieved ? 'close' : 'achieved';
             const progTrace = [{
               type: 'pie',
               hole: 0.65,
@@ -406,7 +423,10 @@ export default function CardSummary({ divisionId, programmes = [], activeFilter,
               labels: ['Gap', 'Close', 'Achieved'],
               marker: {
                 colors: [SEG_COLORS.gap, SEG_COLORS.close, SEG_COLORS.achieved],
-                line: { color: 'rgba(0,0,0,0)', width: 0 },
+                line: {
+                  color: [SEG_COLORS.gap, SEG_COLORS.close, SEG_COLORS.achieved],
+                  width: 2,
+                },
               },
               textinfo: 'none',
               hoverinfo: 'none',
@@ -427,7 +447,7 @@ export default function CardSummary({ divisionId, programmes = [], activeFilter,
                 style={progCardStyle}
               >
                 {/* Mini donut */}
-                <div ref={el => { progDonutRefs.current[i] = el; }} style={{ position: 'relative', width: 140, height: 140, flexShrink: 0 }}>
+                <div ref={el => { progDonutRefs.current[i] = el; }} style={{ position: 'relative', width: 140, height: 140, flexShrink: 0, filter: `drop-shadow(0 0 12px ${SEG_GLOW[progGlowSeg]}0.35)) drop-shadow(0 0 5px ${SEG_GLOW[progGlowSeg]}0.55))` }}>
                   <Plot
                     data={progTrace}
                     layout={progLayout}
