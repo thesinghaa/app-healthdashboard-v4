@@ -386,8 +386,14 @@ Timing:
 | Prog donut sweeps | 0.75s | 0.1 + i×0.1s |
 | Prog KD counters | 0.7s | 0.18 + i×0.08s |
 
+#### Active card layout override (`.lnd-card--active` block in `landing.css`)
+Tightened May 2026 for consistent look at 900px–1080px viewports:
+- `padding: 40px 300px calc(14px + 40px) 64px !important` (top / right / bottom / left — right=300px reserves space for indicator panel)
+- `gap: 16px !important` (between header, pills, programme grid)
+
 #### 1. Indicator Status card (`.lnd-ind-card`) — absolute, right column
 - Position: `top: 10px; right: 10px; width: 276px; height: calc(100dvh - 222px - 20px)`
+- Inner padding: `36px 22px 28px` (top / sides / bottom)
 - Design: `border: 1.5px solid rgba(0,181,204,0.50)`, `background: rgba(0,22,48,0.78)`, `border-radius: 14px`, inset+outer cyan glow, `backdrop-filter: blur(32px)`
 - Header "INDICATOR STATUS": `font-size: 14px; color: #ffffff; font-family: JetBrains Mono; font-weight: 700`
 - 3-segment Plotly donut (160×160px): gap `#E84060` / close `#E89010` / achieved `#28C268`
