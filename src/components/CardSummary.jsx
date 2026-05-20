@@ -92,7 +92,7 @@ const LAYOUT_BASE = {
 };
 
 /* ── component ──────────────────────────────────────────────────── */
-export default function CardSummary({ divisionId, programmes = [], activeFilter, isActive, onKDClick }) {
+export default function CardSummary({ divisionId, programmes = [], activeFilter, isActive, onKDClick, onExploreDivision }) {
   const [selectedSeg, setSelectedSeg] = useState(null);
   const top3Ref = useRef(null);
 
@@ -281,6 +281,17 @@ export default function CardSummary({ divisionId, programmes = [], activeFilter,
               </div>
             ))}
           </div>
+        )}
+
+        {/* Explore Division CTA — bottom of panel */}
+        {onExploreDivision && (
+          <button
+            className="lnd-ind-cta"
+            onClick={(e) => { e.stopPropagation(); onExploreDivision(); }}
+          >
+            <span>Explore Division</span>
+            <span>→</span>
+          </button>
         )}
       </div>
 
