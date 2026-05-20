@@ -352,6 +352,29 @@ All 11 NCD files now have unique, programme-appropriate `keyMetric` and `summary
 - Division card click → `onSelectDivision(div)` → `page: 'division'`
 - CSS classes: `.lnd-root`, `.lnd-header-inner` (glass nav), `.lnd-card`, `.lnd-card--active`, `.lnd-card-ring`, `.lnd-dot--active` (pill shape)
 
+### CardSummary component (`src/components/CardSummary.jsx`)
+Lazy-loaded inside each reel card. Two-column body:
+- **Left** — KD breakdown donut (Plotly pie, 3 segments: Achieved/Close/Gap) + legend
+- **Right** — District Performance product card (`.lnd-perf-card`) — Plotly donut showing worst KD target vs achievement
+
+District performance card:
+- `getMostCriticalKD(divisionId)` — finds KD with lowest gap (most below target) across all programmes
+- `kdAchievePct(kd)` — normalised 0–100: if `target > 100` uses `(numerator/denominator)*100` (count-based KDs); else `(achievement/target)*100`
+- `kdDisplayGap(kd)` — gap in percentage points; count-based KDs: `pct - 100`; others: raw `achievement - target`
+- Donut arc: teal `#00b5cc` if on track, red `#f87171` if below target
+- `--crit` modifier on card when `isBelowTarget`
+- GSAP: slide-in from x:28 + counter tick-up on `isActive` change
+- Click → `onKDClick(kd, programmeId)` → `App.jsx goToKDDirect` → `page: 'kd-indicator'`
+- `shortVal(kd)` — always compact `%` (never raw counts); `shortTarget(kd)` — `100%` for count-based
+
+CSS layout classes:
+- `.lnd-pc-donut-wrap` — centered flex container for donut
+- `.lnd-pc-stats-list` + `.lnd-pc-stats-row` — full-width label/value rows below donut (replaces old `.lnd-pc-body` + `.lnd-pc-stat-col`)
+- `.lnd-pc-stat-lbl` (left) + `.lnd-pc-stat-val` (right) per row
+- Light mode border for rows: `[data-theme="light"] .lnd-pc-stats-row`
+
+App.jsx has `goToKDDirect(division, programmeId, kd)` callback — navigates directly to `kd-indicator` page, bypassing division/programme list layers.
+
 ---
 
 ## Summary page (5-column no-scroll layout) — was landing page
