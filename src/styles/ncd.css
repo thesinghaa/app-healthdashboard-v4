@@ -4824,16 +4824,17 @@ h1, h2, h3, h4 {
   border-top-color: #FF5500 !important;
   box-shadow: 0 2px 12px rgba(26,22,16,0.08) !important;
 }
-/* kd-prog-header — orange fill, white text */
+/* kd-prog-header — black fill, white text, orange accent */
 [data-theme="light"] .kd-prog-header {
-  background: #FF5500 !important;
+  background: #1A1610 !important;
   border-radius: 8px 8px 0 0 !important;
   padding: 14px 20px !important;
   margin: -1px -1px 0 -1px !important;
+  border-left: 4px solid #FF5500 !important;
 }
 [data-theme="light"] .kd-prog-header .kd-prog-name    { color: #FFFFFF !important; }
-[data-theme="light"] .kd-prog-header .kd-prog-summary { color: rgba(255,255,255,0.80) !important; }
-[data-theme="light"] .kd-prog-header .status-pill { background: rgba(255,255,255,0.22) !important; color: #FFFFFF !important; border-color: rgba(255,255,255,0.35) !important; }
+[data-theme="light"] .kd-prog-header .kd-prog-summary { color: rgba(255,255,255,0.65) !important; }
+[data-theme="light"] .kd-prog-header .status-pill { background: rgba(255,85,0,0.25) !important; color: #FF5500 !important; border-color: rgba(255,85,0,0.40) !important; }
 [data-theme="light"] .kd-table-row { border-color: rgba(26,22,16,0.08) !important; }
 [data-theme="light"] .kd-ind-name  { color: #1A1610 !important; }
 [data-theme="light"] .kd-ind-stmt  { color: rgba(26,22,16,0.50) !important; }
@@ -4954,36 +4955,36 @@ h1, h2, h3, h4 {
   background: linear-gradient(90deg, transparent, rgba(255,85,0,0.18) 30%, rgba(255,85,0,0.18) 70%, transparent) !important;
 }
 
-/* Navbar stats pill — !important to beat aurora block, white-on-orange */
+/* Navbar stats pill — !important to beat aurora block, orange-on-black */
 [data-theme="light"] .hs-total {
-  background: rgba(255,255,255,0.14) !important;
+  background: rgba(255,85,0,0.18) !important;
 }
 [data-theme="light"] .hs-total .hs-val {
-  color: #FFFFFF !important;
+  color: #FF5500 !important;
 }
 [data-theme="light"] .hs-total .hs-lbl {
-  color: rgba(255,255,255,0.70) !important;
+  color: rgba(255,255,255,0.55) !important;
 }
 
-/* Search bar — white on orange navbar */
+/* Search bar — on black navbar */
 [data-theme="light"] .home-nav-search {
-  background: rgba(255,255,255,0.18) !important;
-  border: 1px solid rgba(255,255,255,0.30) !important;
+  background: rgba(255,255,255,0.10) !important;
+  border: 1px solid rgba(255,255,255,0.18) !important;
   box-shadow: none !important;
 }
 [data-theme="light"] .home-nav-search:focus-within {
-  border-color: rgba(255,255,255,0.60) !important;
-  background: rgba(255,255,255,0.28) !important;
-  box-shadow: 0 0 0 2px rgba(255,255,255,0.20) !important;
+  border-color: rgba(255,85,0,0.60) !important;
+  background: rgba(255,255,255,0.15) !important;
+  box-shadow: 0 0 0 2px rgba(255,85,0,0.20) !important;
 }
 [data-theme="light"] .hns-input {
   color: #FFFFFF !important;
 }
 [data-theme="light"] .hns-input::placeholder {
-  color: rgba(255,255,255,0.55) !important;
+  color: rgba(255,255,255,0.40) !important;
 }
 [data-theme="light"] .hns-icon {
-  color: rgba(255,255,255,0.70) !important;
+  color: rgba(255,255,255,0.55) !important;
 }
 
 /* ── END LIGHT MODE — ncd.css ───────────────────────────────────── */
