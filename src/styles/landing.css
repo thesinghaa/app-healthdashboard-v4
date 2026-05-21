@@ -488,34 +488,35 @@
 .lnd-cta-arrow { color: rgba(255,255,255,0.60) !important; }
 /* ── END BLACK GLASS CARD OVERRIDES ─────────────────────────────── */
 
-/* ── ZIG-ZAG MINIMALIST CARD ─────────────────────────────────────── */
+/* ── GLASS CARD — all-sides border with 3D depth ─────────────────── */
 .lnd-card {
   width: 1200px !important;
   height: 1000px !important;
-  background: rgba(5, 7, 18, 0.92) !important;
-  backdrop-filter: blur(32px) saturate(160%) !important;
-  -webkit-backdrop-filter: blur(32px) saturate(160%) !important;
-  border-top: 3px solid #00b5cc !important;
-  border-right:  1px solid rgba(255,255,255,0.08) !important;
-  border-bottom: none !important;
-  border-left:   1px solid rgba(255,255,255,0.08) !important;
-  border-radius: 12px 12px 0 0 !important;
-  box-shadow: none !important;
+  background: rgba(5, 7, 18, 0.88) !important;
+  backdrop-filter: blur(36px) saturate(170%) !important;
+  -webkit-backdrop-filter: blur(36px) saturate(170%) !important;
+
+  /* All 4 sides — top is the accent, sides/bottom are translucent accent */
+  border-top:    3px solid var(--bdr, #00b5cc) !important;
+  border-right:  1.5px solid color-mix(in srgb, var(--bdr, #00b5cc) 38%, transparent) !important;
+  border-bottom: 1.5px solid color-mix(in srgb, var(--bdr, #00b5cc) 22%, transparent) !important;
+  border-left:   1.5px solid color-mix(in srgb, var(--bdr, #00b5cc) 38%, transparent) !important;
+  border-radius: 12px !important;
+
+  /* 3D depth: inner bevel light (top/left) + inner shadow (bottom/right) */
+  box-shadow:
+    inset 0  1px 0   rgba(255,255,255,0.14),
+    inset 0 -1px 0   rgba(0,0,0,0.28),
+    inset  1px 0 0   rgba(255,255,255,0.07),
+    inset -1px 0 0   rgba(0,0,0,0.18),
+    0  4px 16px rgba(0,0,0,0.55),
+    0 20px 56px rgba(0,0,0,0.65) !important;
+
+  clip-path: none !important;
+  filter: none !important;
+
   padding: 40px 300px calc(14px + 40px) 64px !important;
   gap: 16px !important;
-  clip-path: polygon(
-    0% 0%, 100% 0%,
-    100% calc(100% - 14px), 97.5% 100%, 95% calc(100% - 14px), 92.5% 100%, 90% calc(100% - 14px), 87.5% 100%,
-    85% calc(100% - 14px), 82.5% 100%, 80% calc(100% - 14px), 77.5% 100%, 75% calc(100% - 14px), 72.5% 100%,
-    70% calc(100% - 14px), 67.5% 100%, 65% calc(100% - 14px), 62.5% 100%, 60% calc(100% - 14px), 57.5% 100%,
-    55% calc(100% - 14px), 52.5% 100%, 50% calc(100% - 14px), 47.5% 100%, 45% calc(100% - 14px), 42.5% 100%,
-    40% calc(100% - 14px), 37.5% 100%, 35% calc(100% - 14px), 32.5% 100%, 30% calc(100% - 14px), 27.5% 100%,
-    25% calc(100% - 14px), 22.5% 100%, 20% calc(100% - 14px), 17.5% 100%, 15% calc(100% - 14px), 12.5% 100%,
-    10% calc(100% - 14px), 7.5% 100%, 5% calc(100% - 14px), 2.5% 100%, 0% calc(100% - 14px)
-  ) !important;
-  filter:
-    drop-shadow(0 2px 8px rgba(0,0,0,0.50))
-    drop-shadow(0 10px 32px rgba(0,0,0,0.60)) !important;
 }
 
 /* Clear notepad decorations */
@@ -529,10 +530,23 @@
 }
 
 .lnd-card--active {
-  background: rgba(7, 10, 24, 0.96) !important;
-  filter:
-    drop-shadow(0 0 28px var(--glow, rgba(59,130,246,0.22)))
-    drop-shadow(0 12px 36px rgba(0,0,0,0.70)) !important;
+  background: rgba(6, 9, 22, 0.94) !important;
+
+  border-top:    3px solid var(--bdr, #00b5cc) !important;
+  border-right:  1.5px solid color-mix(in srgb, var(--bdr, #00b5cc) 58%, transparent) !important;
+  border-bottom: 1.5px solid color-mix(in srgb, var(--bdr, #00b5cc) 38%, transparent) !important;
+  border-left:   1.5px solid color-mix(in srgb, var(--bdr, #00b5cc) 58%, transparent) !important;
+
+  box-shadow:
+    inset 0  1px 0   rgba(255,255,255,0.18),
+    inset 0 -1px 0   rgba(0,0,0,0.32),
+    inset  1px 0 0   rgba(255,255,255,0.09),
+    inset -1px 0 0   rgba(0,0,0,0.22),
+    0  6px 20px rgba(0,0,0,0.60),
+    0 28px 72px rgba(0,0,0,0.72),
+    0  0  64px var(--glow, rgba(0,181,204,0.18)) !important;
+
+  filter: none !important;
 }
 .lnd-card-ring { display: none !important; }
 .lnd-card-idx {
