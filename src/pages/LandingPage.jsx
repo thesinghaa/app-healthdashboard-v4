@@ -69,9 +69,9 @@ function cardStyle(offset) {
   const step = vw >= 1440 ? 1300 : Math.max(cardW + 80, Math.round(vw * 0.88));
   const tx = offset * step;
   const sc = abs === 0 ? 1 : abs === 1 ? 0.82 : 0.66;
-  const op = abs === 0 ? 1 : abs === 1 ? 0.58 : 0.20;
+  const op = abs === 0 ? 1 : 0;   /* side cards invisible until they reach centre */
   const zi = abs === 0 ? 10 : abs === 1 ? 5 : 1;
-  const blur = abs === 0 ? 0 : abs === 1 ? 2 : 6;
+  const blur = 0;
   return {
     transform: `translateX(calc(-50% + ${tx}px)) scale(${sc})`,
     opacity: op,
