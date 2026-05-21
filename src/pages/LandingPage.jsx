@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import { DIVISIONS } from '../data/programs';
+import { KD_TREE } from '../data/kdData';
 import '../styles/landing.css';
 import ThemeToggle from '../components/ThemeToggle';
 
@@ -15,11 +16,44 @@ const DIV_COLORS = {
 };
 
 
+function kdStatus(kd) {
+  if (kd.achievement == null || kd.target == null || kd.target === 0) return 'neutral';
+  const ratio = kd.achievement / kd.target;
+  if (kd.lowerIsBetter) {
+    if (ratio <= 1.00) return 'achieved';
+    if (ratio <= 1.33) return 'close';
+    return 'gap';
+  }
+  if (ratio >= 1.00) return 'achieved';
+  if (ratio >= 0.75) return 'close';
+  return 'gap';
+}
+
+function computeProgStatus(divisionId, progId) {
+  const div = KD_TREE[divisionId];
+  if (!div) return 'yellow';
+  const prog = (div.programmes || {})[progId];
+  if (!prog || !(prog.kds || []).length) return 'yellow';
+  let achieved = 0, close = 0, gap = 0;
+  prog.kds.forEach(kd => {
+    const st = kdStatus(kd);
+    if (st === 'neutral') return;
+    if (st === 'achieved') achieved++;
+    else if (st === 'close') close++;
+    else gap++;
+  });
+  if (gap > 0) return 'red';
+  if (close > 0) return 'yellow';
+  if (achieved > 0) return 'green';
+  return 'yellow';
+}
+
 function getDivStats(div) {
   let red = 0, yellow = 0, green = 0;
   div.programs.forEach(p => {
-    if (p.status === 'red')    red++;
-    else if (p.status === 'yellow') yellow++;
+    const st = computeProgStatus(div.id, p.id);
+    if (st === 'red')    red++;
+    else if (st === 'yellow') yellow++;
     else green++;
   });
   return { red, yellow, green, total: div.programs.length };

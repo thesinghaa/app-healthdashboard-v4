@@ -470,14 +470,39 @@ Searching "ANC first trimester", "NTEP", "cataract", "high risk pregnancies" etc
 
 ---
 
-## Status colour logic
+## Status colour logic (updated May 2026 — ratio-based)
+
+Ratio against national average / NHM target. Used in KDProgrammePage, KDIndicatorDetail, CardSummary, DivisionPage, HomePage, LandingPage.
 
 ```js
 function kdStatus(kd) {
-  if (kd.achievement == null || kd.target == null) return 'neutral';
-  const gap = kd.lowerIsBetter ? kd.target - kd.achievement : kd.achievement - kd.target;
-  if (gap >= 0)   return 'achieved';   // green
-  if (gap >= -10) return 'close';      // amber
-  return 'gap';                        // red
+  if (kd.achievement == null || kd.target == null || kd.target === 0) return 'neutral';
+  const ratio = kd.achievement / kd.target;
+  if (kd.lowerIsBetter) {
+    if (ratio <= 1.00) return 'achieved';   // at or below target — good
+    if (ratio <= 1.33) return 'close';      // up to 33% over target — caution
+    return 'gap';                           // >33% over target — critical
+  }
+  if (ratio >= 1.00) return 'achieved';     // at or above target — green
+  if (ratio >= 0.75) return 'close';        // 75-99% of target — amber
+  return 'gap';                             // below 75% of target — red
 }
 ```
+
+`target` field in kdData.js IS the national average from NHM NPCC FY 2025-26.
+
+### Programme status (dynamic — May 2026)
+`computeProgStatus(divisionId, progId)` derives red/yellow/green from KD_TREE:
+- any KD gap → 'red'
+- any KD close (no gap) → 'yellow'
+- all KDs achieved → 'green'
+- fallback (no KD data) → 'yellow'
+
+Used in: DivisionPage, HomePage (`getSummary` + programme row badges), LandingPage (`getDivStats`). Programme `.status` field in data files is now IGNORED — all status rendering is dynamic.
+
+### CardSummary helpers
+- `kdStatus(kd)` — ratio-based (same as above)
+- `kdDeficit(kd)` — `ratio - 1.0` (lowerIsBetter) or `1.0 - ratio` (regular); positive = worse
+- `getDivKDBreakdown(divId)` — division-level achieved/close/gap/total counts
+- `getTopKDsByStatus(divId, status, n)` — top-n KDs for a segment, sorted by deficit
+- `getProgKDBrk(divId, progId)` — per-programme breakdown

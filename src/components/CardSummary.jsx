@@ -4,11 +4,23 @@ import { gsap } from 'gsap';
 import { KD_TREE } from '../data/kdData';
 
 /* ── helpers ────────────────────────────────────────────────────── */
-function kdGap(kd) {
-  if (kd.achievement == null || kd.target == null) return null;
-  return kd.lowerIsBetter
-    ? kd.target - kd.achievement
-    : kd.achievement - kd.target;
+function kdStatus(kd) {
+  if (kd.achievement == null || kd.target == null || kd.target === 0) return 'neutral';
+  const ratio = kd.achievement / kd.target;
+  if (kd.lowerIsBetter) {
+    if (ratio <= 1.00) return 'achieved';
+    if (ratio <= 1.33) return 'close';
+    return 'gap';
+  }
+  if (ratio >= 1.00) return 'achieved';
+  if (ratio >= 0.75) return 'close';
+  return 'gap';
+}
+
+function kdDeficit(kd) {
+  if (kd.achievement == null || kd.target == null || kd.target === 0) return null;
+  const ratio = kd.achievement / kd.target;
+  return kd.lowerIsBetter ? ratio - 1.0 : 1.0 - ratio;
 }
 
 function getDivKDBreakdown(divisionId) {
@@ -17,12 +29,12 @@ function getDivKDBreakdown(divisionId) {
   let achieved = 0, close = 0, gap = 0, total = 0;
   Object.values(div.programmes || {}).forEach(prog => {
     (prog.kds || []).forEach(kd => {
-      const g = kdGap(kd);
-      if (g === null) return;
+      const st = kdStatus(kd);
+      if (st === 'neutral') return;
       total++;
-      if (g >= 0)   achieved++;
-      else if (g >= -10) close++;
-      else          gap++;
+      if (st === 'achieved') achieved++;
+      else if (st === 'close') close++;
+      else gap++;
     });
   });
   return { achieved, close, gap, total };
@@ -34,19 +46,16 @@ function getTopKDsByStatus(divisionId, status, n = 3) {
   const results = [];
   Object.entries(div.programmes || {}).forEach(([progId, prog]) => {
     (prog.kds || []).forEach(kd => {
-      const g = kdGap(kd);
-      if (g === null) return;
-      let matches = false;
-      if (status === 'achieved' && g >= 0)    matches = true;
-      if (status === 'close'    && g >= -10 && g < 0) matches = true;
-      if (status === 'gap'      && g < -10)   matches = true;
-      if (matches) results.push({ ...kd, programmeId: progId, _gap: g });
+      const st = kdStatus(kd);
+      if (st !== status) return;
+      const deficit = kdDeficit(kd);
+      results.push({ ...kd, programmeId: progId, _deficit: deficit ?? 0 });
     });
   });
   results.sort((a, b) => {
-    if (status === 'gap')      return a._gap - b._gap;       // most negative first
-    if (status === 'close')    return Math.abs(a._gap) - Math.abs(b._gap); // closest to 0
-    return b._gap - a._gap;                                   // highest first
+    if (status === 'gap')   return b._deficit - a._deficit;
+    if (status === 'close') return a._deficit - b._deficit;
+    return a._deficit - b._deficit;
   });
   return results.slice(0, n);
 }
@@ -58,11 +67,11 @@ function getProgKDBrk(divisionId, progId) {
   if (!prog) return { achieved: 0, close: 0, gap: 0 };
   let achieved = 0, close = 0, gap = 0;
   (prog.kds || []).forEach(kd => {
-    const g = kdGap(kd);
-    if (g === null) return;
-    if (g >= 0)        achieved++;
-    else if (g >= -10) close++;
-    else               gap++;
+    const st = kdStatus(kd);
+    if (st === 'neutral') return;
+    if (st === 'achieved') achieved++;
+    else if (st === 'close') close++;
+    else gap++;
   });
   return { achieved, close, gap };
 }

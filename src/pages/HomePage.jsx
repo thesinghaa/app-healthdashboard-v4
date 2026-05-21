@@ -4,13 +4,46 @@ import { DIVISIONS, STATUS_CONFIG } from '../data/programs';
 import { KD_TREE } from '../data/kdData';
 import ThemeToggle from '../components/ThemeToggle';
 
+function kdStatus(kd) {
+  if (kd.achievement == null || kd.target == null || kd.target === 0) return 'neutral';
+  const ratio = kd.achievement / kd.target;
+  if (kd.lowerIsBetter) {
+    if (ratio <= 1.00) return 'achieved';
+    if (ratio <= 1.33) return 'close';
+    return 'gap';
+  }
+  if (ratio >= 1.00) return 'achieved';
+  if (ratio >= 0.75) return 'close';
+  return 'gap';
+}
+
+function computeProgStatus(divisionId, progId) {
+  const div = KD_TREE[divisionId];
+  if (!div) return 'yellow';
+  const prog = (div.programmes || {})[progId];
+  if (!prog || !(prog.kds || []).length) return 'yellow';
+  let achieved = 0, close = 0, gap = 0;
+  prog.kds.forEach(kd => {
+    const st = kdStatus(kd);
+    if (st === 'neutral') return;
+    if (st === 'achieved') achieved++;
+    else if (st === 'close') close++;
+    else gap++;
+  });
+  if (gap > 0) return 'red';
+  if (close > 0) return 'yellow';
+  if (achieved > 0) return 'green';
+  return 'yellow';
+}
+
 function getSummary() {
   let total = 0, red = 0, yellow = 0, green = 0;
   DIVISIONS.forEach(div => {
     div.programs.forEach(p => {
       total++;
-      if (p.status === 'red') red++;
-      else if (p.status === 'yellow') yellow++;
+      const st = computeProgStatus(div.id, p.id);
+      if (st === 'red') red++;
+      else if (st === 'yellow') yellow++;
       else green++;
     });
   });
@@ -260,7 +293,7 @@ export default function HomePage({ onSelectProgram, onSelectDivision, onBack }) 
             const accent = DIV_ACCENT[div.id] || '#00b5cc';
             const bg     = DIV_BG[div.id]     || 'rgba(232,80,10,0.04)';
             const counts = { red: 0, yellow: 0, green: 0 };
-            div.programs.forEach(p => counts[p.status]++);
+            div.programs.forEach(p => counts[computeProgStatus(div.id, p.id)]++);
 
             return (
               <div key={div.id} className={`lp-card lp-card--${div.id}`} style={{ '--accent': accent, '--card-bg': bg }}>
@@ -300,7 +333,7 @@ export default function HomePage({ onSelectProgram, onSelectDivision, onBack }) 
                     return (
                     <button
                       key={prog.id}
-                      className={`lp-prog lp-prog--${prog.status}${searchQuery && !matched ? ' lp-prog--dimmed' : ''}${searchQuery && matched ? ' lp-prog--highlighted' : ''}`}
+                      className={`lp-prog lp-prog--${computeProgStatus(div.id, prog.id)}${searchQuery && !matched ? ' lp-prog--dimmed' : ''}${searchQuery && matched ? ' lp-prog--highlighted' : ''}`}
                       onClick={() => onSelectProgram(prog, div)}
                     >
                       <div className="lp-prog-left">
@@ -309,8 +342,8 @@ export default function HomePage({ onSelectProgram, onSelectDivision, onBack }) 
                           {prog.keyMetric && <span className="lp-prog-metric">{prog.keyMetric}</span>}
                         </div>
                       </div>
-                      <span className={`lp-prog-badge lp-badge--${prog.status}`}>
-                        {STATUS_TEXT[prog.status]}
+                      <span className={`lp-prog-badge lp-badge--${computeProgStatus(div.id, prog.id)}`}>
+                        {STATUS_TEXT[computeProgStatus(div.id, prog.id)]}
                       </span>
                     </button>
                     );

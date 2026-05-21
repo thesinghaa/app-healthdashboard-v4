@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import ThemeToggle from '../components/ThemeToggle';
 import { STATUS_CONFIG } from '../data/programs';
+import { KD_TREE } from '../data/kdData';
 
 const STATUS_CLASS = {
   red:    'status-critical',
@@ -29,14 +30,49 @@ const CHIP_COLOR = {
   hss:  '#B45309',
 };
 
+function kdStatus(kd) {
+  if (kd.achievement == null || kd.target == null || kd.target === 0) return 'neutral';
+  const ratio = kd.achievement / kd.target;
+  if (kd.lowerIsBetter) {
+    if (ratio <= 1.00) return 'achieved';
+    if (ratio <= 1.33) return 'close';
+    return 'gap';
+  }
+  if (ratio >= 1.00) return 'achieved';
+  if (ratio >= 0.75) return 'close';
+  return 'gap';
+}
+
+function computeProgStatus(divisionId, progId) {
+  const div = KD_TREE[divisionId];
+  if (!div) return 'yellow';
+  const prog = (div.programmes || {})[progId];
+  if (!prog || !(prog.kds || []).length) return 'yellow';
+  let achieved = 0, close = 0, gap = 0;
+  prog.kds.forEach(kd => {
+    const st = kdStatus(kd);
+    if (st === 'neutral') return;
+    if (st === 'achieved') achieved++;
+    else if (st === 'close') close++;
+    else gap++;
+  });
+  if (gap > 0) return 'red';
+  if (close > 0) return 'yellow';
+  if (achieved > 0) return 'green';
+  return 'yellow';
+}
+
 export default function DivisionPage({ division, onBack, onSelectProgram, onCurrentStatus }) {
   const wrapRef = useRef(null);
 
+  const statusMap = {};
+  division.programs.forEach(p => { statusMap[p.id] = computeProgStatus(division.id, p.id); });
+
   const sorted = [...division.programs].sort(
-    (a, b) => STATUS_CONFIG[a.status].order - STATUS_CONFIG[b.status].order,
+    (a, b) => STATUS_CONFIG[statusMap[a.id]].order - STATUS_CONFIG[statusMap[b.id]].order,
   );
   const counts = { red: 0, yellow: 0, green: 0 };
-  division.programs.forEach(p => counts[p.status]++);
+  division.programs.forEach(p => counts[statusMap[p.id]]++);
 
   const chipColor = CHIP_COLOR[division.id] || '#00b5cc';
 
@@ -84,7 +120,7 @@ export default function DivisionPage({ division, onBack, onSelectProgram, onCurr
           {sorted.map(prog => (
             <div
               key={prog.id}
-              className={`dv-prog-card ${STATUS_CLASS[prog.status]}`}
+              className={`dv-prog-card ${STATUS_CLASS[statusMap[prog.id]]}`}
               onClick={() => onSelectProgram(prog, division)}
               role="button"
               tabIndex={0}
@@ -94,8 +130,8 @@ export default function DivisionPage({ division, onBack, onSelectProgram, onCurr
               {/* Header */}
               <div className="dv-card-header">
                 <span className="dv-card-name">{prog.name}</span>
-                <span className={`status-pill ${STATUS_PILL[prog.status].cls}`}>
-                  {STATUS_PILL[prog.status].label}
+                <span className={`status-pill ${STATUS_PILL[statusMap[prog.id]].cls}`}>
+                  {STATUS_PILL[statusMap[prog.id]].label}
                 </span>
               </div>
 

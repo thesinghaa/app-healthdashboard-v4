@@ -24,10 +24,15 @@ const DISTRICTS    = [
 
 /* ── Status helpers ──────────────────────────────────────────────── */
 function kdStatus(kd) {
-  if (kd.achievement == null || kd.target == null) return 'neutral';
-  const gap = kd.lowerIsBetter ? kd.target - kd.achievement : kd.achievement - kd.target;
-  if (gap >= 0)    return 'achieved';
-  if (gap >= -10)  return 'close';
+  if (kd.achievement == null || kd.target == null || kd.target === 0) return 'neutral';
+  const ratio = kd.achievement / kd.target;
+  if (kd.lowerIsBetter) {
+    if (ratio <= 1.00) return 'achieved';
+    if (ratio <= 1.33) return 'close';
+    return 'gap';
+  }
+  if (ratio >= 1.00) return 'achieved';
+  if (ratio >= 0.75) return 'close';
   return 'gap';
 }
 
