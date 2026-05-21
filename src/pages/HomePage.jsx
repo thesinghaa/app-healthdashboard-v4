@@ -300,8 +300,6 @@ export default function HomePage({ onSelectProgram, onSelectDivision, onBack }) 
                 </div>
               </div>
               <div className="home-right">
-                <ThemeToggle />
-
                 <div className="home-nav-search">
                   <svg width="12" height="12" viewBox="0 0 16 16" fill="none" className="hns-icon">
                     <circle cx="6.5" cy="6.5" r="5" stroke="currentColor" strokeWidth="1.7"/>
@@ -318,6 +316,7 @@ export default function HomePage({ onSelectProgram, onSelectDivision, onBack }) 
                     <button className="hns-clear" onClick={() => setSearchQuery('')}>×</button>
                   )}
                 </div>
+                <ThemeToggle />
               </div>
             </div>
           </div>
