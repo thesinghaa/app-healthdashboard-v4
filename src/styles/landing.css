@@ -488,29 +488,44 @@
 .lnd-cta-arrow { color: rgba(255,255,255,0.60) !important; }
 /* ── END BLACK GLASS CARD OVERRIDES ─────────────────────────────── */
 
-/* ── GLASS CARD — all-sides border with 3D depth ─────────────────── */
+/* ── GLASS CARD — teal borders, 3D depth ─────────────────────────── */
 .lnd-card {
   width: 1200px !important;
   height: 1000px !important;
-  background: rgba(5, 7, 18, 0.88) !important;
-  backdrop-filter: blur(36px) saturate(170%) !important;
-  -webkit-backdrop-filter: blur(36px) saturate(170%) !important;
 
-  /* All 4 sides — top is the accent, sides/bottom are translucent accent */
-  border-top:    3px solid var(--bdr, #00b5cc) !important;
-  border-right:  1.5px solid color-mix(in srgb, var(--bdr, #00b5cc) 38%, transparent) !important;
-  border-bottom: 1.5px solid color-mix(in srgb, var(--bdr, #00b5cc) 22%, transparent) !important;
-  border-left:   1.5px solid color-mix(in srgb, var(--bdr, #00b5cc) 38%, transparent) !important;
-  border-radius: 12px !important;
+  /* Frosted glass — dark core, subtle blue tint at top */
+  background: linear-gradient(
+    170deg,
+    rgba(0, 22, 38, 0.82) 0%,
+    rgba(4,  8,  20, 0.92) 55%,
+    rgba(2,  6,  16, 0.96) 100%
+  ) !important;
+  backdrop-filter: blur(40px) saturate(180%) brightness(0.95) !important;
+  -webkit-backdrop-filter: blur(40px) saturate(180%) brightness(0.95) !important;
 
-  /* 3D depth: inner bevel light (top/left) + inner shadow (bottom/right) */
+  /* Teal borders — top is the anchor, sides taper off naturally */
+  border-top:    3px solid #00b5cc !important;
+  border-right:  1.5px solid rgba(0,181,204,0.32) !important;
+  border-bottom: 1.5px solid rgba(0,181,204,0.18) !important;
+  border-left:   1.5px solid rgba(0,181,204,0.32) !important;
+  border-radius: 14px !important;
+
+  /* 3D depth: glass rim highlight + inner edge shadows + outer lift */
   box-shadow:
-    inset 0  1px 0   rgba(255,255,255,0.14),
-    inset 0 -1px 0   rgba(0,0,0,0.28),
-    inset  1px 0 0   rgba(255,255,255,0.07),
-    inset -1px 0 0   rgba(0,0,0,0.18),
-    0  4px 16px rgba(0,0,0,0.55),
-    0 20px 56px rgba(0,0,0,0.65) !important;
+    /* glass rim — white sheen on top inner edge */
+    inset 0  2px  6px  rgba(255,255,255,0.09),
+    /* left wall highlight */
+    inset  2px 0  8px  rgba(0,181,204,0.06),
+    /* right wall shadow */
+    inset -2px 0  8px  rgba(0,0,0,0.22),
+    /* bottom inner recess */
+    inset 0 -3px 10px  rgba(0,0,0,0.35),
+    /* outer lift layers */
+    0  2px  6px  rgba(0,0,0,0.40),
+    0  8px  24px rgba(0,0,0,0.52),
+    0 24px  64px rgba(0,0,0,0.62),
+    /* teal floor glow */
+    0 40px  80px rgba(0,181,204,0.06) !important;
 
   clip-path: none !important;
   filter: none !important;
@@ -530,21 +545,28 @@
 }
 
 .lnd-card--active {
-  background: rgba(6, 9, 22, 0.94) !important;
+  background: linear-gradient(
+    170deg,
+    rgba(0, 26, 44, 0.86) 0%,
+    rgba(4,  9,  22, 0.94) 55%,
+    rgba(2,  6,  18, 0.98) 100%
+  ) !important;
 
-  border-top:    3px solid var(--bdr, #00b5cc) !important;
-  border-right:  1.5px solid color-mix(in srgb, var(--bdr, #00b5cc) 58%, transparent) !important;
-  border-bottom: 1.5px solid color-mix(in srgb, var(--bdr, #00b5cc) 38%, transparent) !important;
-  border-left:   1.5px solid color-mix(in srgb, var(--bdr, #00b5cc) 58%, transparent) !important;
+  border-top:    3px solid #00d4ee !important;
+  border-right:  1.5px solid rgba(0,181,204,0.52) !important;
+  border-bottom: 1.5px solid rgba(0,181,204,0.32) !important;
+  border-left:   1.5px solid rgba(0,181,204,0.52) !important;
 
   box-shadow:
-    inset 0  1px 0   rgba(255,255,255,0.18),
-    inset 0 -1px 0   rgba(0,0,0,0.32),
-    inset  1px 0 0   rgba(255,255,255,0.09),
-    inset -1px 0 0   rgba(0,0,0,0.22),
-    0  6px 20px rgba(0,0,0,0.60),
-    0 28px 72px rgba(0,0,0,0.72),
-    0  0  64px var(--glow, rgba(0,181,204,0.18)) !important;
+    inset 0  2px  8px  rgba(255,255,255,0.12),
+    inset  2px 0 10px  rgba(0,181,204,0.09),
+    inset -2px 0 10px  rgba(0,0,0,0.28),
+    inset 0 -3px 12px  rgba(0,0,0,0.42),
+    0  4px  12px rgba(0,0,0,0.48),
+    0 12px  36px rgba(0,0,0,0.60),
+    0 32px  80px rgba(0,0,0,0.70),
+    0  0   72px rgba(0,181,204,0.16),
+    0 48px 100px rgba(0,181,204,0.08) !important;
 
   filter: none !important;
 }

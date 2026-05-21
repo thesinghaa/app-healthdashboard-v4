@@ -8,11 +8,11 @@ const CardSummary = lazy(() => import('../components/CardSummary'));
 
 /* ── Per-division colour accents ─────────────────────────────────── */
 const DIV_COLORS = {
-  rch:  { border: '#a78bfa', glow: 'rgba(167,139,250,0.28)' },
-  ndcp: { border: '#60a5fa', glow: 'rgba(96,165,250,0.28)'  },
-  ncd:  { border: '#818cf8', glow: 'rgba(129,140,248,0.28)' },
-  hss:  { border: '#c084fc', glow: 'rgba(192,132,252,0.28)' },
-  hrh:  { border: '#a5b4fc', glow: 'rgba(165,180,252,0.28)' },
+  rch:  { border: '#00b5cc', glow: 'rgba(0,181,204,0.28)' },
+  ndcp: { border: '#00b5cc', glow: 'rgba(0,181,204,0.28)' },
+  ncd:  { border: '#00b5cc', glow: 'rgba(0,181,204,0.28)' },
+  hss:  { border: '#00b5cc', glow: 'rgba(0,181,204,0.28)' },
+  hrh:  { border: '#00b5cc', glow: 'rgba(0,181,204,0.28)' },
 };
 
 
