@@ -1,63 +1,69 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 
 const API_BASE = import.meta.env.VITE_REPORT_API_URL || '';
 
+/* Steps match real backend SSE events — idx 0-4 */
 const STEPS = [
-  { label: 'Collecting programme data', pct: 20 },
-  { label: 'Fetching HMIS live trends', pct: 38 },
-  { label: 'Generating charts',         pct: 52 },
-  { label: 'Analysing performance',     pct: 70 },
-  { label: 'Writing report',            pct: 90 },
-  { label: 'Finalising',               pct: 100 },
+  { label: 'Building KD briefing',   pct: 10  },
+  { label: 'Collecting data',        pct: 32  },
+  { label: 'Analysing performance',  pct: 62  },
+  { label: 'Writing report',         pct: 88  },
+  { label: 'Finalising',            pct: 100 },
 ];
 
 export default function ReportModal({ divisionId, divisionName, onClose }) {
-  const [phase, setPhase]     = useState('idle'); // idle | loading | done | error
+  const [phase,   setPhase]   = useState('idle'); // idle | loading | done | error
   const [stepIdx, setStepIdx] = useState(0);
-  const [html, setHtml]       = useState('');
-  const [errMsg, setErrMsg]   = useState('');
-  const intervalRef           = useRef(null);
+  const [html,    setHtml]    = useState('');
+  const [errMsg,  setErrMsg]  = useState('');
 
-  function advanceSteps() {
-    let i = 0;
-    setStepIdx(0);
-    intervalRef.current = setInterval(() => {
-      i += 1;
-      if (i < STEPS.length - 1) setStepIdx(i);
-      else clearInterval(intervalRef.current);
-    }, 6000);
-  }
-
+  /* SSE stream reader — real progress from backend, no fake timer */
   async function generate() {
     setPhase('loading');
     setStepIdx(0);
-    advanceSteps();
     try {
       const res = await fetch(`${API_BASE}/api/report/${divisionId}`, {
         method: 'POST',
       });
-      clearInterval(intervalRef.current);
+      /* Pre-SSE failures (404 / 405 / 500 before streaming starts) */
       if (!res.ok) {
         const err = await res.json().catch(() => ({ detail: 'Server error' }));
-        throw new Error(err.detail || 'Server error');
+        throw new Error(err.detail || `HTTP ${res.status}`);
       }
-      const data = await res.json();
-      setHtml(data.html);
-      setStepIdx(STEPS.length - 1);
-      setPhase('done');
+      const reader  = res.body.getReader();
+      const decoder = new TextDecoder();
+      let   buffer  = '';
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() ?? '';
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue;
+          let event;
+          try { event = JSON.parse(line.slice(6)); } catch { continue; }
+          if (event.type === 'step')  setStepIdx(event.idx);
+          if (event.type === 'done')  { setHtml(event.html); setPhase('done'); }
+          if (event.type === 'error') { setErrMsg(event.message); setPhase('error'); }
+        }
+      }
     } catch (e) {
-      clearInterval(intervalRef.current);
       setErrMsg(e.message);
       setPhase('error');
     }
   }
 
+  /* Blob URL — avoids deprecated document.write and popup-blocker issues */
   function handlePrint() {
-    const win = window.open('', '_blank');
-    win.document.write(html);
-    win.document.close();
-    win.focus();
-    setTimeout(() => win.print(), 400);
+    const blob = new Blob([html], { type: 'text/html' });
+    const url  = URL.createObjectURL(blob);
+    const win  = window.open(url, '_blank');
+    if (win) {
+      win.addEventListener('load', () => {
+        setTimeout(() => { win.print(); URL.revokeObjectURL(url); }, 400);
+      });
+    }
   }
 
   const step = STEPS[Math.min(stepIdx, STEPS.length - 1)];
@@ -100,15 +106,14 @@ export default function ReportModal({ divisionId, divisionName, onClose }) {
               </div>
               <h3 className="rpt-idle-title">Generate Division Report</h3>
               <p className="rpt-idle-desc">
-                3 AI agents will analyse all {divisionName} KDs, HMIS live trends, and
-                NFHS baselines — then write a 4–5 page executive report with embedded charts.
+                3 AI agents will analyse all {divisionName} KDs and NFHS baselines —
+                then write a 4–5 page executive report with recommendations.
                 Takes ~40–60 seconds.
               </p>
               <div className="rpt-idle-pills">
                 <span className="rpt-pill">KD Performance</span>
-                <span className="rpt-pill">HMIS Trends</span>
+                <span className="rpt-pill">Gap Analysis</span>
                 <span className="rpt-pill">NFHS Baseline</span>
-                <span className="rpt-pill">Charts</span>
                 <span className="rpt-pill">Recommendations</span>
               </div>
               <button className="rpt-btn rpt-btn--generate" onClick={generate}>
@@ -126,7 +131,7 @@ export default function ReportModal({ divisionId, divisionName, onClose }) {
                 <div className="rpt-progress-fill" style={{ width: `${step.pct}%` }} />
               </div>
               <p className="rpt-loading-sub">
-                Powered by Groq + CrewAI · {step.pct}% complete
+                Powered by Groq · {step.pct}% complete
               </p>
               <div className="rpt-agent-list">
                 {STEPS.map((s, i) => (
@@ -145,7 +150,8 @@ export default function ReportModal({ divisionId, divisionName, onClose }) {
               <p className="rpt-error-title">Report generation failed</p>
               <p className="rpt-error-msg">{errMsg}</p>
               <p className="rpt-error-hint">
-                Make sure the backend is running: <code>cd backend-py && uvicorn server:app --reload</code>
+                Ensure <code>GROQ_API_KEY</code> is set in Vercel environment variables.
+                Timeout errors require Vercel Pro for 60-second function execution.
               </p>
               <button className="rpt-btn rpt-btn--generate" onClick={() => setPhase('idle')}>
                 Try Again

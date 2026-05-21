@@ -2,8 +2,7 @@ import { KD_TREE } from '../../src/data/kdData.js';
 
 export const maxDuration = 60;
 
-const VALID = new Set(['rch', 'ndcp', 'ncd', 'hss', 'hrh']);
-
+const VALID        = new Set(['rch', 'ndcp', 'ncd', 'hss', 'hrh']);
 const FAST_MODEL   = 'llama-3.1-8b-instant';
 const STRONG_MODEL = 'llama-3.3-70b-versatile';
 
@@ -26,7 +25,6 @@ function buildSummary(divisionId) {
 
   const lines = [`DIVISION: ${div.fullName || divisionId.toUpperCase()}\n`];
   let totalKDs = 0, totalAch = 0, totalClose = 0, totalGap = 0;
-
   const gaps = [];
 
   for (const [progId, prog] of Object.entries(div.programmes || {})) {
@@ -48,14 +46,22 @@ function buildSummary(divisionId) {
         : 'N/A';
       const flag = st === 'gap' ? '[CRITICAL]' : st === 'close' ? '[CAUTION]' : '[OK]';
       lines.push(
-        `  KD${kd.no || ''} ${flag} ${kd.indicator}: ${kd.achievedLabel ?? kd.achievement} / target ${kd.targetLabel ?? kd.target} (${ratio}% of target)${kd.lowerIsBetter ? ' [lower is better]' : ''}`
+        `  KD${kd.no || ''} ${flag} ${kd.indicator}: ` +
+        `${kd.achievedLabel ?? kd.achievement} / target ${kd.targetLabel ?? kd.target} ` +
+        `(${ratio}% of target)${kd.lowerIsBetter ? ' [lower is better]' : ''}`
       );
 
       if (st === 'gap' && kd.achievement != null) {
         const deficit = kd.lowerIsBetter
           ? (kd.achievement / kd.target - 1) * 100
           : (1 - kd.achievement / kd.target) * 100;
-        gaps.push({ indicator: kd.indicator, programme: prog.name, deficit, achieved: kd.achievedLabel ?? kd.achievement, target: kd.targetLabel ?? kd.target });
+        gaps.push({
+          indicator: kd.indicator,
+          programme: prog.name,
+          deficit,
+          achieved: kd.achievedLabel ?? kd.achievement,
+          target:   kd.targetLabel ?? kd.target,
+        });
       }
     }
 
@@ -84,7 +90,7 @@ async function groqCall(apiKey, model, systemMsg, userMsg, maxTokens = 2000) {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
+      'Content-Type':  'application/json',
     },
     body: JSON.stringify({
       model,
@@ -92,7 +98,7 @@ async function groqCall(apiKey, model, systemMsg, userMsg, maxTokens = 2000) {
         { role: 'system', content: systemMsg },
         { role: 'user',   content: userMsg   },
       ],
-      max_tokens: maxTokens,
+      max_tokens:  maxTokens,
       temperature: 0.3,
     }),
   });
@@ -105,27 +111,39 @@ async function groqCall(apiKey, model, systemMsg, userMsg, maxTokens = 2000) {
 }
 
 export default async function handler(req, res) {
-  if (req.method === 'OPTIONS') {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-    return res.status(204).end();
-  }
+  /* Fix #2 — CORS on every response path, not just success */
+  res.setHeader('Access-Control-Allow-Origin',  '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  if (req.method !== 'POST') return res.status(405).json({ detail: 'Method not allowed' });
+  if (req.method === 'OPTIONS') return res.status(204).end();
+  if (req.method !== 'POST')   return res.status(405).json({ detail: 'Method not allowed' });
 
   const { divisionId } = req.query;
-  if (!VALID.has(divisionId)) return res.status(404).json({ detail: `Unknown division: ${divisionId}` });
+  if (!VALID.has(divisionId))
+    return res.status(404).json({ detail: `Unknown division: ${divisionId}` });
 
   const apiKey = process.env.GROQ_API_KEY;
-  if (!apiKey) return res.status(500).json({ detail: 'GROQ_API_KEY not configured' });
+  if (!apiKey)
+    return res.status(500).json({ detail: 'GROQ_API_KEY not configured' });
+
+  /* Switch to SSE streaming — real progress events, keeps connection alive */
+  res.setHeader('Content-Type',  'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection',    'keep-alive');
+
+  const send = (data) => res.write(`data: ${JSON.stringify(data)}\n\n`);
 
   const divData = KD_TREE[divisionId];
   const divName = divData?.fullName || divisionId.toUpperCase();
-  const kdSummary = buildSummary(divisionId);
 
   try {
-    // Agent 1 — DataCollector: structure the data
+    /* Step 0 — build structured KD briefing from static data */
+    send({ type: 'step', idx: 0 });
+    const kdSummary = buildSummary(divisionId);
+
+    /* Step 1 — Agent 1: DataCollector (fast model, structured output) */
+    send({ type: 'step', idx: 1 });
     const briefing = await groqCall(
       apiKey, FAST_MODEL,
       `You are a data analyst at Pahlé India Foundation embedded with the NHM Arunachal Pradesh team. ` +
@@ -141,7 +159,8 @@ export default async function handler(req, res) {
       1500,
     );
 
-    // Agent 2 — Analyst: interpret priorities and recommendations
+    /* Step 2 — Agent 2: Analyst (strong model, strategic analysis) */
+    send({ type: 'step', idx: 2 });
     const analysis = await groqCall(
       apiKey, STRONG_MODEL,
       `You are a senior public health programme analyst with 10 years in NHM monitoring in India. ` +
@@ -158,8 +177,12 @@ export default async function handler(req, res) {
       2000,
     );
 
-    // Agent 3 — ReportWriter: produce final HTML report
-    const today = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+    /* Step 3 — Agent 3: ReportWriter (strong model, full HTML)
+       Fix #5 — raised to 6000 tokens so appendix KD table doesn't truncate */
+    send({ type: 'step', idx: 3 });
+    const today = new Date().toLocaleDateString('en-IN', {
+      day: 'numeric', month: 'long', year: 'numeric',
+    });
     const htmlReport = await groqCall(
       apiKey, STRONG_MODEL,
       `You write executive health reports for government health departments in India. ` +
@@ -184,10 +207,11 @@ export default async function handler(req, res) {
       `- Max-width 900px centered, A4-friendly padding for print\n` +
       `- Professional look — this will be printed and shared with senior NHM officials\n` +
       `- DO NOT use markdown, only valid HTML starting with <!DOCTYPE html>`,
-      4000,
+      6000,
     );
 
-    // Extract clean HTML — model sometimes wraps in code fences
+    /* Step 4 — strip code fences if model wrapped output */
+    send({ type: 'step', idx: 4 });
     let html = htmlReport.trim();
     if (html.startsWith('```')) {
       html = html.replace(/^```[a-z]*\n?/, '').replace(/\n?```$/, '').trim();
@@ -197,11 +221,13 @@ export default async function handler(req, res) {
       if (idx > -1) html = html.slice(idx);
     }
 
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    return res.status(200).json({ html, division: divName });
+    send({ type: 'done', html, division: divName });
+    res.end();
 
   } catch (e) {
     console.error('Report generation error:', e);
-    return res.status(500).json({ detail: e.message || 'Report generation failed' });
+    /* Error via SSE so CORS headers (already sent) are in scope */
+    send({ type: 'error', message: e.message || 'Report generation failed' });
+    res.end();
   }
 }
