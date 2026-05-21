@@ -4824,7 +4824,16 @@ h1, h2, h3, h4 {
   border-top-color: #FF5500 !important;
   box-shadow: 0 2px 12px rgba(26,22,16,0.08) !important;
 }
-[data-theme="light"] .kd-prog-header .kd-prog-name { color: #1A1610 !important; }
+/* kd-prog-header — orange fill, white text */
+[data-theme="light"] .kd-prog-header {
+  background: #FF5500 !important;
+  border-radius: 8px 8px 0 0 !important;
+  padding: 14px 20px !important;
+  margin: -1px -1px 0 -1px !important;
+}
+[data-theme="light"] .kd-prog-header .kd-prog-name    { color: #FFFFFF !important; }
+[data-theme="light"] .kd-prog-header .kd-prog-summary { color: rgba(255,255,255,0.80) !important; }
+[data-theme="light"] .kd-prog-header .status-pill { background: rgba(255,255,255,0.22) !important; color: #FFFFFF !important; border-color: rgba(255,255,255,0.35) !important; }
 [data-theme="light"] .kd-table-row { border-color: rgba(26,22,16,0.08) !important; }
 [data-theme="light"] .kd-ind-name  { color: #1A1610 !important; }
 [data-theme="light"] .kd-ind-stmt  { color: rgba(26,22,16,0.50) !important; }
@@ -4903,17 +4912,23 @@ h1, h2, h3, h4 {
 
 /* ── Summary page (HomePage) — aurora palette counter-overrides ─── */
 
-/* Column header strip */
+/* Column header — orange fill, white text */
 [data-theme="light"] .lp-card-header {
-  background: #FFFFFF !important;
-  border-bottom: 1px solid rgba(26,22,16,0.08) !important;
+  background: #FF5500 !important;
+  border-bottom: none !important;
   box-shadow: none !important;
 }
+[data-theme="light"] .lp-div-name  { color: #FFFFFF !important; }
+[data-theme="light"] .lp-div-sub   { color: rgba(255,255,255,0.75) !important; }
+[data-theme="light"] .lp-count { color: rgba(255,255,255,0.90) !important; }
+[data-theme="light"] .lp-count--red    { background: rgba(255,255,255,0.18) !important; border-color: rgba(255,255,255,0.30) !important; }
+[data-theme="light"] .lp-count--yellow { background: rgba(255,255,255,0.18) !important; border-color: rgba(255,255,255,0.30) !important; }
+[data-theme="light"] .lp-count--green  { background: rgba(255,255,255,0.18) !important; border-color: rgba(255,255,255,0.30) !important; }
 
-/* Division badge pill */
+/* Division badge pill — white on orange */
 [data-theme="light"] .lp-div-tag {
-  background: #FF5500 !important;
-  border-color: #FF5500 !important;
+  background: rgba(255,255,255,0.22) !important;
+  border-color: rgba(255,255,255,0.40) !important;
   color: #FFFFFF !important;
 }
 
@@ -4939,36 +4954,36 @@ h1, h2, h3, h4 {
   background: linear-gradient(90deg, transparent, rgba(255,85,0,0.18) 30%, rgba(255,85,0,0.18) 70%, transparent) !important;
 }
 
-/* Navbar stats pill — hs-total needs !important to beat aurora block */
+/* Navbar stats pill — !important to beat aurora block, white-on-orange */
 [data-theme="light"] .hs-total {
-  background: rgba(255,85,0,0.08) !important;
+  background: rgba(255,255,255,0.14) !important;
 }
 [data-theme="light"] .hs-total .hs-val {
-  color: #1A1610 !important;
+  color: #FFFFFF !important;
 }
 [data-theme="light"] .hs-total .hs-lbl {
-  color: rgba(26,22,16,0.55) !important;
+  color: rgba(255,255,255,0.70) !important;
 }
 
-/* Search bar */
+/* Search bar — white on orange navbar */
 [data-theme="light"] .home-nav-search {
-  background: rgba(255,255,255,0.95) !important;
-  border: 1px solid rgba(26,22,16,0.15) !important;
-  box-shadow: 0 1px 4px rgba(26,22,16,0.10) !important;
+  background: rgba(255,255,255,0.18) !important;
+  border: 1px solid rgba(255,255,255,0.30) !important;
+  box-shadow: none !important;
 }
 [data-theme="light"] .home-nav-search:focus-within {
-  border-color: rgba(255,85,0,0.50) !important;
-  background: #FFFFFF !important;
-  box-shadow: 0 0 0 3px rgba(255,85,0,0.12), 0 2px 8px rgba(26,22,16,0.10) !important;
+  border-color: rgba(255,255,255,0.60) !important;
+  background: rgba(255,255,255,0.28) !important;
+  box-shadow: 0 0 0 2px rgba(255,255,255,0.20) !important;
 }
 [data-theme="light"] .hns-input {
-  color: #1A1610 !important;
+  color: #FFFFFF !important;
 }
 [data-theme="light"] .hns-input::placeholder {
-  color: rgba(26,22,16,0.40) !important;
+  color: rgba(255,255,255,0.55) !important;
 }
 [data-theme="light"] .hns-icon {
-  color: rgba(26,22,16,0.45) !important;
+  color: rgba(255,255,255,0.70) !important;
 }
 
 /* ── END LIGHT MODE — ncd.css ───────────────────────────────────── */
