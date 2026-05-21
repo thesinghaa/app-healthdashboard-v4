@@ -123,9 +123,8 @@ export default function LandingPage({ onSelectDivision, onViewSummary, onDirectK
             <span className="lnd-brand-sub">Unified Health Dashboard</span>
           </div>
 
-{/* Summary CTA + theme toggle */}
-          <div className="lnd-header-right">
-            <ThemeToggle />
+{/* Centre — All Programmes CTA */}
+          <div className="lnd-header-centre">
             <button className="lnd-summary-btn" onClick={onViewSummary}>
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                 <rect x="1" y="1" width="5" height="5" rx="1" stroke="currentColor" strokeWidth="1.5"/>
@@ -135,6 +134,11 @@ export default function LandingPage({ onSelectDivision, onViewSummary, onDirectK
               </svg>
               All Programmes
             </button>
+          </div>
+
+          {/* Right — theme toggle */}
+          <div className="lnd-header-right">
+            <ThemeToggle />
           </div>
         </div>
       </header>
