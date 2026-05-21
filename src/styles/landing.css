@@ -2,6 +2,20 @@
    landing.css — Cinema reel landing page
    ═══════════════════════════════════════════════════════════════════ */
 
+/* ── Segment colour tokens (indicator donut SVG) ─────────────────── */
+:root {
+  --seg-gap:           #FF4D6A;
+  --seg-close:         #FFD700;
+  --seg-achieved:      #00E87E;
+  --seg-track:         rgba(255,255,255,0.06);
+}
+[data-theme="light"] {
+  --seg-gap:           #EF4444;
+  --seg-close:         #EAB308;
+  --seg-achieved:      #22C55E;
+  --seg-track:         rgba(26,22,16,0.08);
+}
+
 /* ── Root ────────────────────────────────────────────────────────── */
 .lnd-root {
   height: 100dvh;

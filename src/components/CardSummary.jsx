@@ -122,9 +122,9 @@ function getWorstKD(divisionId, progId) {
 }
 
 const SEG_COLORS = {
-  gap:      '#EF4444',   // red-500
-  close:    '#EAB308',   // yellow-500
-  achieved: '#22C55E',   // green-500
+  gap:      '#EF4444',
+  close:    '#EAB308',
+  achieved: '#22C55E',
 };
 
 const SEG_GLOW = {
@@ -132,6 +132,17 @@ const SEG_GLOW = {
   close:    'rgba(234,179,8,',
   achieved: 'rgba(34,197,94,',
 };
+
+/* ── SVG arc geometry helpers (for custom indicator donut) ──── */
+function _polar(cx, cy, r, deg) {
+  const rad = (deg - 90) * Math.PI / 180;
+  return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) };
+}
+function _arc(cx, cy, r, s, e) {
+  const large = (e - s) > 180 ? 1 : 0;
+  const p1 = _polar(cx, cy, r, s), p2 = _polar(cx, cy, r, e);
+  return `M ${p1.x} ${p1.y} A ${r} ${r} 0 ${large} 1 ${p2.x} ${p2.y}`;
+}
 
 const SEG_LABELS = {
   gap:      'Critical',
@@ -289,35 +300,18 @@ export default function CardSummary({ divisionId, programmes = [], activeFilter,
     return 'achieved';
   }, [brk]);
 
-  /* ── indicator status donut traces ─────────────────────────── */
-  const indTrace = useMemo(() => [{
-    type: 'pie',
-    hole: 0.65,
-    values: [
-      Math.max(0.01, brk.gap),
-      Math.max(0.01, brk.close),
-      Math.max(0.01, brk.achieved),
-    ],
-    labels: ['Gap', 'Close', 'Achieved'],
-    marker: {
-      colors: [SEG_COLORS.gap, SEG_COLORS.close, SEG_COLORS.achieved],
-      line: {
-        color: [SEG_COLORS.gap, SEG_COLORS.close, SEG_COLORS.achieved],
-        width: 1.5,
-      },
-    },
-    textinfo: 'none',
-    hovertemplate: '<b>%{label}</b>: %{value}<extra></extra>',
-    sort: false,
-    direction: 'clockwise',
-    rotation: -90,
-  }], [brk]);
-
-  const indLayout = useMemo(() => ({
-    ...LAYOUT_BASE,
-    width: 160,
-    height: 160,
-  }), []);
+  /* ── custom SVG indicator donut (glow + rounded caps) ──────── */
+  const indSegments = useMemo(() => {
+    const CX = 80, CY = 80, R = 58, SW = 15;
+    const tot = Math.max(1, brk.gap + brk.close + brk.achieved);
+    let deg = 0;
+    return ['gap', 'close', 'achieved'].map(k => {
+      const sweep = (Math.max(0.8, brk[k]) / tot) * 360;
+      const d = _arc(CX, CY, R, deg + 2.5, deg + sweep - 2.5);
+      deg += sweep;
+      return { k, d, CX, CY, R, SW };
+    });
+  }, [brk]);
 
   /* ── top-3 KDs for selected segment ────────────────────────── */
   const top3 = useMemo(() => {
@@ -325,13 +319,9 @@ export default function CardSummary({ divisionId, programmes = [], activeFilter,
     return getTopKDsByStatus(divisionId, selectedSeg);
   }, [divisionId, selectedSeg]);
 
-  /* ── Plotly pie click handler ───────────────────────────────── */
-  function handleIndClick(data) {
+  /* ── SVG segment click handler ─────────────────────────────── */
+  function handleSegClick(seg) {
     if (!isActive) return;
-    const labelRaw = data.points[0]?.label;
-    const map = { Achieved: 'achieved', Close: 'close', Gap: 'gap' };
-    const seg = map[labelRaw];
-    if (!seg) return;
     setSelectedSeg(prev => prev === seg ? null : seg);
   }
 
@@ -362,14 +352,31 @@ export default function CardSummary({ divisionId, programmes = [], activeFilter,
           <span className="lnd-ind-title">INDICATOR STATUS</span>
         </div>
 
-        {/* Donut */}
-        <div ref={indDonutRef} style={{ position: 'relative', width: 160, height: 160, margin: '0 auto', filter: `drop-shadow(0 0 10px ${SEG_GLOW[indGlow]}0.18)) drop-shadow(0 0 4px ${SEG_GLOW[indGlow]}0.28))` }}>
-          <Plot
-            data={indTrace}
-            layout={indLayout}
-            config={{ displayModeBar: false, responsive: false }}
-            onClick={isActive ? handleIndClick : undefined}
-          />
+        {/* Donut — custom SVG, glow + rounded caps */}
+        <div ref={indDonutRef} style={{ position: 'relative', width: 160, height: 160, margin: '0 auto' }}>
+          <svg width="160" height="160" viewBox="0 0 160 160" style={{ display: 'block', overflow: 'visible' }}>
+            <defs>
+              <filter id="ind-glow-gap"      x="-60%" y="-60%" width="220%" height="220%"><feDropShadow dx="0" dy="0" stdDeviation="5" floodColor="var(--seg-gap)"      floodOpacity="0.75"/></filter>
+              <filter id="ind-glow-close"    x="-60%" y="-60%" width="220%" height="220%"><feDropShadow dx="0" dy="0" stdDeviation="5" floodColor="var(--seg-close)"    floodOpacity="0.65"/></filter>
+              <filter id="ind-glow-achieved" x="-60%" y="-60%" width="220%" height="220%"><feDropShadow dx="0" dy="0" stdDeviation="5" floodColor="var(--seg-achieved)" floodOpacity="0.65"/></filter>
+            </defs>
+            {/* track ring */}
+            <circle cx="80" cy="80" r="58" fill="none" stroke="var(--seg-track)" strokeWidth="15"/>
+            {/* segments */}
+            {indSegments.map(({ k, d, SW }) => (
+              <path
+                key={k}
+                d={d}
+                stroke={`var(--seg-${k})`}
+                strokeWidth={SW}
+                fill="none"
+                strokeLinecap="round"
+                filter={`url(#ind-glow-${k})`}
+                style={{ cursor: isActive ? 'pointer' : 'default' }}
+                onClick={() => handleSegClick(k)}
+              />
+            ))}
+          </svg>
           <div className="lnd-ind-center">
             <span ref={totalNumRef} className="lnd-ind-total-num">{brk.total}</span>
             <span className="lnd-ind-total-lbl">Indicators</span>
