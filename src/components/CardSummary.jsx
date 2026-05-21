@@ -95,6 +95,32 @@ function getProgKDBrk(divisionId, progId) {
   return { achieved, close, gap };
 }
 
+/* Returns KDs for a programme filtered by status */
+function getProgKDsByStatus(divisionId, progId, status) {
+  const div = KD_TREE[divisionId];
+  if (!div) return [];
+  const prog = (div.programmes || {})[progId];
+  if (!prog) return [];
+  return (prog.kds || []).filter(kd => kdStatus(kd) === status);
+}
+
+/* Returns the single worst KD for a programme (gap > close > achieved, then by deficit) */
+function getWorstKD(divisionId, progId) {
+  const div = KD_TREE[divisionId];
+  if (!div) return null;
+  const prog = (div.programmes || {})[progId];
+  if (!prog) return null;
+  const kds = (prog.kds || []).filter(kd => kdStatus(kd) !== 'neutral');
+  if (!kds.length) return null;
+  const priority = { gap: 0, close: 1, achieved: 2 };
+  return [...kds].sort((a, b) => {
+    const pa = priority[kdStatus(a)] ?? 3;
+    const pb = priority[kdStatus(b)] ?? 3;
+    if (pa !== pb) return pa - pb;
+    return (kdDeficit(b) ?? 0) - (kdDeficit(a) ?? 0);
+  })[0];
+}
+
 const SEG_COLORS = {
   gap:      '#D93258',   // deep rose-crimson — clear danger, not neon hot-pink
   close:    '#C8780A',   // burnished amber-gold — warm, not garish
@@ -133,7 +159,6 @@ export default function CardSummary({ divisionId, programmes = [], activeFilter,
   const totalNumRef = useRef(null);
   const legNumRefs = useRef([null, null, null]);
   const progDonutRefs = useRef([]);
-  const progNumRefs = useRef([]);
 
   /* ── division-level KD breakdown ───────────────────────────── */
   const brk = useMemo(() => getDivKDBreakdown(divisionId), [divisionId]);
@@ -183,12 +208,11 @@ export default function CardSummary({ divisionId, programmes = [], activeFilter,
   /* GSAP: entrance animations on card activate */
   useEffect(() => {
     if (!isActive) {
-      // Clean up masks if card deactivates mid-animation
-      [indDonutRef.current, ...progDonutRefs.current].forEach(el => {
-        if (!el) return;
-        el.style.maskImage = '';
-        el.style.webkitMaskImage = '';
-      });
+      // Clean up mask if card deactivates mid-animation
+      if (indDonutRef.current) {
+        indDonutRef.current.style.maskImage = '';
+        indDonutRef.current.style.webkitMaskImage = '';
+      }
       return;
     }
 
@@ -231,32 +255,29 @@ export default function CardSummary({ divisionId, programmes = [], activeFilter,
     });
   }, [isActive]);
 
-  /* GSAP: prog card donut entrances — staggered speedometer sweep */
+  /* GSAP: prog donut entrances — staggered speedometer sweep */
   useEffect(() => {
-    if (!isActive) return;
+    if (!isActive) {
+      progDonutRefs.current.forEach(el => {
+        if (!el) return;
+        el.style.maskImage = '';
+        el.style.webkitMaskImage = '';
+      });
+      return;
+    }
     progDonutRefs.current.forEach((el, i) => {
       if (!el) return;
       const obj = { a: 0 };
       el.style.maskImage = 'conic-gradient(from -90deg, #000 0deg 0deg, transparent 0deg 360deg)';
       el.style.webkitMaskImage = 'conic-gradient(from -90deg, #000 0deg 0deg, transparent 0deg 360deg)';
       gsap.to(obj, {
-        a: 360, duration: 0.75, ease: 'power2.inOut', delay: 0.1 + i * 0.1,
+        a: 360, duration: 0.75, ease: 'power2.inOut', delay: 0.1 + i * 0.08,
         onUpdate() {
           const m = `conic-gradient(from -90deg, #000 0deg ${obj.a}deg, transparent ${obj.a}deg 360deg)`;
           el.style.maskImage = m;
           el.style.webkitMaskImage = m;
         },
         onComplete() { el.style.maskImage = ''; el.style.webkitMaskImage = ''; },
-      });
-    });
-    progNumRefs.current.forEach((el, i) => {
-      if (!el) return;
-      const pb = getProgKDBrk(divisionId, filteredProgs[i]?.id);
-      const target = pb.gap + pb.close + pb.achieved;
-      const obj = { val: 0 };
-      gsap.to(obj, {
-        val: target, duration: 0.7, ease: 'power2.out', delay: 0.18 + i * 0.08,
-        onUpdate() { if (el) el.textContent = Math.round(obj.val); },
       });
     });
   }, [isActive, filteredProgs]);
@@ -423,59 +444,83 @@ export default function CardSummary({ divisionId, programmes = [], activeFilter,
             <p className="lnd-prog-empty">No programmes</p>
           )}
           {filteredProgs.map((prog, i) => {
-            const pb = getProgKDBrk(divisionId, prog.id);
-            const progGlowSeg = pb.gap >= pb.close && pb.gap >= pb.achieved ? 'gap' : pb.close >= pb.achieved ? 'close' : 'achieved';
+            const pb         = getProgKDBrk(divisionId, prog.id);
+            const worstKD    = getWorstKD(divisionId, prog.id);
+            const progStatus = computeProgStatus(divisionId, prog.id);
+            const sc         = SEG_COLORS[progStatus === 'red' ? 'gap' : progStatus === 'yellow' ? 'close' : 'achieved'];
+            const glowSeg    = pb.gap > 0 ? 'gap' : pb.close > 0 ? 'close' : 'achieved';
+
+            /* Build hover text per segment — list of KD indicator names */
+            const hoverText = ['gap', 'close', 'achieved'].map(seg => {
+              const kds = getProgKDsByStatus(divisionId, prog.id, seg);
+              if (!kds.length) return 'None';
+              return kds.map(k => `• ${k.indicator}`).join('<br>');
+            });
+
             const progTrace = [{
               type: 'pie',
-              hole: 0.65,
-              values: [
-                Math.max(0.01, pb.gap),
-                Math.max(0.01, pb.close),
-                Math.max(0.01, pb.achieved),
-              ],
-              labels: ['Gap', 'Close', 'Achieved'],
+              hole: 0.62,
+              values: [Math.max(0.01, pb.gap), Math.max(0.01, pb.close), Math.max(0.01, pb.achieved)],
+              labels: ['Critical', 'Caution', 'On Track'],
+              customdata: hoverText,
+              hovertemplate: '<b>%{label}: %{value} KDs</b><br>%{customdata}<extra></extra>',
               marker: {
                 colors: [SEG_COLORS.gap, SEG_COLORS.close, SEG_COLORS.achieved],
-                line: {
-                  color: [SEG_COLORS.gap, SEG_COLORS.close, SEG_COLORS.achieved],
-                  width: 1.5,
-                },
+                line: { color: [SEG_COLORS.gap, SEG_COLORS.close, SEG_COLORS.achieved], width: 2 },
               },
               textinfo: 'none',
-              hoverinfo: 'none',
               sort: false,
               direction: 'clockwise',
               rotation: -90,
             }];
-            const progLayout = {
-              ...LAYOUT_BASE,
-              width: 140,
-              height: 140,
-            };
+
+            const progLayout = { ...LAYOUT_BASE, width: 120, height: 120 };
             const totalKDs = pb.gap + pb.close + pb.achieved;
+
             return (
               <div
                 key={prog.id}
-                className="lnd-prog-card"
-                style={progCardStyle}
+                className={`lnd-prog-card lnd-prog-card--${progStatus}`}
+                style={{ ...progCardStyle, '--pc-clr': sc }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (worstKD && onKDClick) onKDClick(worstKD, prog.id);
+                }}
               >
-                {/* Mini donut */}
-                <div ref={el => { progDonutRefs.current[i] = el; }} style={{ position: 'relative', width: 140, height: 140, flexShrink: 0, filter: `drop-shadow(0 0 8px ${SEG_GLOW[progGlowSeg]}0.18)) drop-shadow(0 0 3px ${SEG_GLOW[progGlowSeg]}0.28))` }}>
+                {/* Donut with hover */}
+                <div
+                  ref={el => { progDonutRefs.current[i] = el; }}
+                  style={{
+                    position: 'relative', width: 120, height: 120, flexShrink: 0,
+                    filter: `drop-shadow(0 0 8px ${SEG_GLOW[glowSeg]}0.22)) drop-shadow(0 0 3px ${SEG_GLOW[glowSeg]}0.32))`,
+                  }}
+                >
                   <Plot
                     data={progTrace}
                     layout={progLayout}
                     config={{ displayModeBar: false, responsive: false }}
                   />
+                  {/* Center label */}
                   <div className="lnd-prog-donut-center">
-                    <span ref={el => { progNumRefs.current[i] = el; }}>{totalKDs}</span>
-                    <span className="lnd-prog-dc-lbl">Indicators</span>
+                    <span style={{ fontSize: 16, fontWeight: 700, color: '#fff' }}>{totalKDs}</span>
+                    <span className="lnd-prog-dc-lbl">KDs</span>
                   </div>
                 </div>
 
-                <p className="lnd-prog-name">{prog.label || prog.name}</p>
-                {prog.keyMetric && (
-                  <p className="lnd-prog-metric">{prog.keyMetric}</p>
+                {/* Programme name */}
+                <p className="lnd-pc-name">{prog.label || prog.name}</p>
+
+                {/* Worst KD indicator */}
+                {worstKD && (
+                  <p className="lnd-pc-kd-name">{worstKD.indicator}</p>
                 )}
+
+                {/* Mini counts */}
+                <div className="lnd-pc-counts">
+                  {pb.gap      > 0 && <span style={{ color: SEG_COLORS.gap      }}>{pb.gap} gap</span>}
+                  {pb.close    > 0 && <span style={{ color: SEG_COLORS.close    }}>{pb.close} caution</span>}
+                  {pb.achieved > 0 && <span style={{ color: SEG_COLORS.achieved }}>{pb.achieved} ok</span>}
+                </div>
               </div>
             );
           })}

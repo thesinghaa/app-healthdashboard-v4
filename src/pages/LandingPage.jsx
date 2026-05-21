@@ -184,6 +184,20 @@ export default function LandingPage({ onSelectDivision, onViewSummary, onDirectK
                     </svg>
                   </button>
                 )}
+                {isActive && (
+                  <button
+                    className="lnd-report-btn"
+                    onClick={(e) => { e.stopPropagation(); setReportDiv(div); }}
+                  >
+                    <svg width="12" height="12" viewBox="0 0 13 13" fill="none">
+                      <rect x="1.5" y="1" width="10" height="11" rx="1.5" stroke="currentColor" strokeWidth="1.3"/>
+                      <path d="M4 4.5h5M4 6.5h5M4 8.5h3" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
+                      <circle cx="10.5" cy="10.5" r="2.5" fill="currentColor" opacity=".9"/>
+                      <path d="M9.8 10.5h1.4M10.5 9.8v1.4" stroke="#051c2c" strokeWidth="1" strokeLinecap="round"/>
+                    </svg>
+                    AI Report
+                  </button>
+                )}
               </div>
               <div className="lnd-card-divider" />
 
@@ -221,20 +235,6 @@ export default function LandingPage({ onSelectDivision, onViewSummary, onDirectK
                   </button>
                 )}
               </div>
-
-              {/* Generate Report — active card only */}
-              {isActive && (
-                <button
-                  className="lnd-report-btn"
-                  onClick={(e) => { e.stopPropagation(); setReportDiv(div); }}
-                >
-                  <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-                    <rect x="1.5" y="1" width="10" height="11" rx="1.5" stroke="currentColor" strokeWidth="1.3"/>
-                    <path d="M4 4.5h5M4 6.5h5M4 8.5h3" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
-                  </svg>
-                  Generate Report
-                </button>
-              )}
 
               {/* Summary — prog section is a flex child, fills remaining space */}
               <Suspense fallback={<div className="lnd-summary-skeleton" />}>

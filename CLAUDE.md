@@ -307,6 +307,18 @@ All card backgrounds use dark glass: `rgba(10,34,54,0.82)` + `blur(18-32px)` + `
 ### Override block strategy
 Dark mode overrides are appended at the END of each CSS file as clearly labelled `DARK MODE OVERRIDES` blocks. Never edit the original rules — always append. This makes rollback trivial.
 
+### Light mode — `[data-theme="light"]` on `<html>` (audited May 2026)
+ThemeToggle sets `document.documentElement.dataset.theme = 'light'`. All light overrides use `[data-theme="light"] .class` selectors.
+
+**Landing page light mode** (in `landing.css`, comprehensive block added May 2026):
+- `.lnd-prog-section` → warm cream `rgba(240,235,228,0.82)` background replacing dark navy
+- `.lnd-prog-card` → near-white `rgba(255,252,248,0.90)`, dark text
+- `.lnd-pc-name`, `.lnd-pc-kd-name`, `.lnd-prog-donut-center span` → `#1A1610` dark text
+- `.lnd-ind-card` → light glass `rgba(255,252,248,0.96)`, cyan border
+- `.lnd-report-btn` → teal `#0077a8` colour on light bg
+- `.lnd-ind-cta` → teal border + text on light bg
+- All inner-page overrides are in `ncd.css` LIGHT MODE OVERRIDES block (topbars, cards, breadcrumbs, prog cards, KD table, detail cards)
+
 **Important**: `.bento-card` class in `grid.css` is dead — NOT used in any JSX. Home page uses `.carousel-card`.
 
 ---
@@ -366,6 +378,7 @@ FastAPI + CrewAI + matplotlib alternative. Not deployed. Run locally: `cd backen
 7. **No feature flags, no backwards-compat shims** — just change the code
 8. **Bundle size warning** is expected (~5.8MB due to plotly.js + KD_TREE import) — acceptable, do not split unless asked
 9. **Deploy** — `vercel build --prod && vercel deploy --prod --prebuilt` from `/Users/thesinghaa/PIFHealthDashboard-v3/`
+10. **Local dev with API routes** — use `npx vercel dev --listen 3001` (NOT `npm run dev`). Plain Vite dev server returns 404 for `/api/report/[divisionId]`. `GROQ_API_KEY` must be exported as a shell env var BEFORE starting vercel dev (`.env.local` is NOT picked up by vercel dev). Launch config in `.claude/launch.json` uses port 3001.
 
 ---
 
@@ -460,23 +473,42 @@ Key helpers:
 
 CSS classes: `.lnd-ind-card`, `.lnd-ind-header`, `.lnd-ind-title`, `.lnd-ind-center`, `.lnd-ind-total-num`, `.lnd-ind-total-lbl`, `.lnd-ind-legend`, `.lnd-ind-leg-row`, `.lnd-ind-leg-row--active`, `.lnd-ind-leg-dot`, `.lnd-ind-leg-num`, `.lnd-ind-leg-lbl`, `.lnd-ind-top3`, `.lnd-ind-top3-header`, `.lnd-ind-kd-row`, `.lnd-ind-kd-name`, `.lnd-ind-kd-gap`, `.lnd-ind-cta`
 
-#### 2. Programme grid (`.lnd-prog-section`) — flex child, left content area
+#### 2. Programme grid (`.lnd-prog-section`) — flex child, left content area (redesigned May 2026)
 - Layout: `flex: 1; min-height: 180px; max-height: 340px` — flows naturally after card header content
 - Section label ("CRITICAL PROGRAMMES" etc.): `font-size: 12px; color: #ffffff; font-family: JetBrains Mono`
 - Filtered by `resolvedFilter` = `activeFilter || (any red? → any yellow? → green)`
 - Programme card sizing: `flex: 1` if ≤4 cards (equal width), `width: 220px; flexShrink: 0` if >4 (enables horizontal scroll)
-- Each programme card: mini Plotly donut (140×140px) + name + keyMetric; donut has drop-shadow glow matching dominant segment
-- `getProgKDBrk(divisionId, progId)` — per-programme KD breakdown from KD_TREE
 - Scroll: `overflow-x: auto; scrollbar-width: none` — 2-finger trackpad gesture
 
-CSS classes: `.lnd-prog-section`, `.lnd-prog-section-label`, `.lnd-prog-scroll`, `.lnd-prog-card`, `.lnd-prog-donut-center`, `.lnd-prog-dc-lbl`, `.lnd-prog-name`, `.lnd-prog-metric`, `.lnd-prog-empty`
+**Programme card design (current — policymaker-focused):**
+- Plotly donut (120×120px) showing KD breakdown per programme with segment glow
+- Hover tooltips per segment list specific KD indicator names (`customdata` + `hovertemplate`)
+- `getProgKDBrk(divisionId, progId)` — per-programme KD breakdown from KD_TREE
+- `getProgKDsByStatus(divisionId, progId, status)` — returns KD objects filtered by status (for hover data)
+- `getWorstKD(divisionId, progId)` — single worst KD: sorted gap>close>achieved then by deficit magnitude
+- Worst KD name shown below prog name as `.lnd-pc-kd-name` (2-line clamp)
+- Mini counts row (`.lnd-pc-counts`) — coloured spans: `N gap / N caution / N ok`
+- Card border-top colour-coded via `--pc-clr` CSS custom prop + `lnd-prog-card--red/yellow/green` modifier
+- Click on prog card → `onKDClick(worstKD, prog.id)` → navigates directly to worst KD indicator detail
+
+Key CSS classes: `.lnd-prog-section`, `.lnd-prog-section-label`, `.lnd-prog-scroll`, `.lnd-prog-card`, `.lnd-prog-card--red`, `.lnd-prog-card--yellow`, `.lnd-prog-card--green`, `.lnd-prog-donut-center`, `.lnd-prog-dc-lbl`, `.lnd-pc-name`, `.lnd-pc-kd-name`, `.lnd-pc-counts`
 
 #### LandingPage state for CardSummary
 - `activeFilter` state (null | 'red' | 'yellow' | 'green') — resets to null on active card change
 - Pill buttons toggle `activeFilter`; active pill gets `.lnd-pill--sel` class (box-shadow ring + opaque bg)
-- Expand arrow `↗` (`.lnd-idx-expand`) next to division short label — `onClick → onSelectDivision(div)`
 - `onKDClick` prop: `(kd, programmeId) => onDirectKD(div, programmeId, kd)` → navigates to `kd-indicator`
 - `onExploreDivision` prop: `isActive ? () => onSelectDivision(div) : null` — wired from inside indicator panel
+
+**`lnd-card-idx` header row layout (updated May 2026):**
+- `#01 | Division Label` (left) + expand arrow `↗` (`.lnd-idx-expand`, stays left) + `AI Report` button (`.lnd-report-btn`, `margin-left: auto` pushes it to far right)
+- CRITICAL: these are two SEPARATE `{isActive && ...}` conditionals — NOT a Fragment. Wrapping both in a Fragment would cause `margin-left: auto` to push the whole fragment right, moving the expand arrow too.
+- `AI Report` button (`.lnd-report-btn`) → opens `ReportModal` for the active division
+- Removed duplicate "Generate Report" button that previously appeared below the status pills
+
+**AI Report on landing page (added May 2026):**
+- `reportDiv` state in `LandingPage.jsx` — set to active division when `AI Report` clicked
+- `{reportDiv && <ReportModal division={reportDiv} onClose={() => setReportDiv(null)} />}` rendered at root of `LandingPage`
+- Same `ReportModal.jsx` used by `DivisionPage`
 
 `App.jsx` has `goToKDDirect(division, programmeId, kd)` callback — navigates directly to `kd-indicator`, bypassing division/programme list layers.
 

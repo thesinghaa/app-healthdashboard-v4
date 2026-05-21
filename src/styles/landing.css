@@ -731,6 +731,84 @@
 [data-theme="light"] .lnd-dot--active { background: #FF5500; }
 
 
+/* ── AI Report button ───────────────────────────────────────────── */
+[data-theme="light"] .lnd-report-btn {
+  color: #0077a8;
+  background: rgba(0,181,204,0.08);
+  border-color: rgba(0,181,204,0.35);
+}
+[data-theme="light"] .lnd-report-btn:hover {
+  background: rgba(0,181,204,0.16);
+  border-color: rgba(0,181,204,0.60);
+  color: #00667a;
+}
+
+/* ── Expand arrow ───────────────────────────────────────────────── */
+[data-theme="light"] .lnd-idx-expand { color: rgba(255,85,0,0.55); }
+[data-theme="light"] .lnd-idx-expand:hover { color: #FF5500; }
+
+/* ── Indicator status panel ─────────────────────────────────────── */
+[data-theme="light"] .lnd-ind-card {
+  background: rgba(255,252,248,0.96) !important;
+  border-color: rgba(0,181,204,0.35) !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(0,181,204,0.06),
+    0 4px 20px rgba(26,22,16,0.10) !important;
+}
+[data-theme="light"] .lnd-ind-title      { color: #1A1610; }
+[data-theme="light"] .lnd-ind-total-num  { color: #1A1610; }
+[data-theme="light"] .lnd-ind-total-lbl  { color: rgba(26,22,16,0.45); }
+[data-theme="light"] .lnd-ind-leg-lbl    { color: rgba(26,22,16,0.65); }
+[data-theme="light"] .lnd-ind-leg-num    { color: #1A1610; }
+[data-theme="light"] .lnd-ind-leg-row--active { background: rgba(26,22,16,0.05); }
+[data-theme="light"] .lnd-ind-top3-header    { /* inherits seg color — OK */ }
+[data-theme="light"] .lnd-ind-kd-name        { color: rgba(26,22,16,0.75); }
+[data-theme="light"] .lnd-ind-kd-row:hover   { background: rgba(26,22,16,0.05); }
+[data-theme="light"] .lnd-ind-cta {
+  color: #0077a8 !important;
+  border-color: rgba(0,181,204,0.40) !important;
+  background: rgba(0,181,204,0.06) !important;
+}
+
+/* ── Programme section container ───────────────────────────────── */
+[data-theme="light"] .lnd-prog-section {
+  background: rgba(240,235,228,0.82) !important;
+  border-color: rgba(255,85,0,0.22) !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255,85,0,0.06),
+    0 2px 12px rgba(26,22,16,0.08) !important;
+}
+[data-theme="light"] .lnd-prog-section-label { color: rgba(26,22,16,0.60); }
+
+/* ── Individual programme cards ─────────────────────────────────── */
+[data-theme="light"] .lnd-prog-card {
+  background: rgba(255,252,248,0.90);
+  border-color: rgba(26,22,16,0.10);
+}
+[data-theme="light"] .lnd-prog-card:hover {
+  background: rgba(255,255,255,1);
+  box-shadow: 0 4px 16px rgba(26,22,16,0.12);
+}
+/* Status border stays as-is (--pc-clr is the status color, fine in light) */
+
+/* Status badge in light mode */
+[data-theme="light"] .lnd-prog-card--red    .lnd-pc-status { color: #C53030; background: rgba(220,38,38,0.08);  border-color: rgba(220,38,38,0.28);  }
+[data-theme="light"] .lnd-prog-card--yellow .lnd-pc-status { color: #B45309; background: rgba(217,119,6,0.08);  border-color: rgba(217,119,6,0.28);  }
+[data-theme="light"] .lnd-prog-card--green  .lnd-pc-status { color: #047857; background: rgba(5,150,105,0.07);  border-color: rgba(5,150,105,0.28);  }
+
+/* Text colours on light cards */
+[data-theme="light"] .lnd-pc-name    { color: #1A1610; }
+[data-theme="light"] .lnd-pc-kd-name { color: rgba(26,22,16,0.52); }
+[data-theme="light"] .lnd-pc-sep     { color: rgba(26,22,16,0.30); }
+[data-theme="light"] .lnd-pc-tgt     { color: rgba(26,22,16,0.45); }
+
+/* Donut center labels */
+[data-theme="light"] .lnd-prog-donut-center span:first-child { color: #1A1610 !important; }
+[data-theme="light"] .lnd-prog-dc-lbl { color: rgba(26,22,16,0.40); }
+
+/* Prog empty state */
+[data-theme="light"] .lnd-prog-empty { color: rgba(26,22,16,0.35); }
+
 /* ── END LIGHT MODE — landing.css ───────────────────────────────── */
 
 /* ════════════════════════════════════════════════════════════════════
@@ -1110,11 +1188,139 @@
 .lnd-prog-section-label { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: #ffffff; margin: 0 0 14px; flex-shrink: 0; }
 .lnd-prog-scroll { display: flex; gap: 16px; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; -ms-overflow-style: none; align-items: stretch; flex: 1; min-height: 0; }
 .lnd-prog-scroll::-webkit-scrollbar { display: none; }
-.lnd-prog-card { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 24px 16px; min-width: 0; transition: border-color 0.18s, background 0.18s; }
-.lnd-prog-donut-center { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 700; color: #ffffff; flex-direction: column; }
-.lnd-prog-dc-lbl { font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 1px; }
-.lnd-prog-name { font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; color: #ffffff; margin: 0; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 100%; }
-.lnd-prog-metric { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: rgba(255,255,255,0.38); margin: 0; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 100%; }
+/* Programme card — donut-centred, status-coded */
+.lnd-prog-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-top: 3px solid var(--pc-clr, rgba(255,255,255,0.20));
+  border-radius: 12px;
+  padding: 16px 14px 14px;
+  min-width: 0;
+  cursor: pointer;
+  transition: background 0.18s, box-shadow 0.18s;
+}
+.lnd-prog-card:hover {
+  background: rgba(255,255,255,0.08);
+  box-shadow: 0 0 16px rgba(0,0,0,0.3);
+}
+/* Status-coded left border */
+.lnd-prog-card--red    { --pc-clr: #D93258; }
+.lnd-prog-card--yellow { --pc-clr: #C8780A; }
+.lnd-prog-card--green  { --pc-clr: #149650; }
+
+/* Status badge */
+.lnd-pc-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.50);
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.14);
+  padding: 3px 8px;
+  border-radius: 99px;
+  align-self: flex-start;
+  flex-shrink: 0;
+}
+.lnd-prog-card--red    .lnd-pc-status { color: #D93258; background: rgba(217,50,88,0.14);  border-color: rgba(217,50,88,0.32);  }
+.lnd-prog-card--yellow .lnd-pc-status { color: #C8780A; background: rgba(200,120,10,0.14); border-color: rgba(200,120,10,0.32); }
+.lnd-prog-card--green  .lnd-pc-status { color: #149650; background: rgba(20,150,80,0.14);  border-color: rgba(20,150,80,0.32);  }
+.lnd-pc-status-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--pc-clr, rgba(255,255,255,0.50));
+  flex-shrink: 0;
+}
+/* Programme name */
+.lnd-pc-name {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+  line-height: 1.25;
+  text-align: center;
+  width: 100%;
+}
+/* Worst KD indicator name */
+.lnd-pc-kd-name {
+  font-family: 'Inter', sans-serif;
+  font-size: 10.5px;
+  font-weight: 400;
+  color: rgba(255,255,255,0.42);
+  margin: 0;
+  line-height: 1.4;
+  text-align: center;
+  width: 100%;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+/* Progress bar */
+.lnd-pc-bar-wrap { display: flex; flex-direction: column; gap: 6px; }
+.lnd-pc-bar-track {
+  height: 5px;
+  background: rgba(255,255,255,0.10);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.lnd-pc-bar-fill {
+  height: 100%;
+  border-radius: 99px;
+  transition: width 0.6s cubic-bezier(0.4,0,0.2,1);
+}
+/* Achievement / target values */
+.lnd-pc-bar-values {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+}
+.lnd-pc-ach {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1;
+}
+.lnd-pc-sep {
+  font-family: 'Inter', sans-serif;
+  font-size: 10px;
+  color: rgba(255,255,255,0.25);
+}
+.lnd-pc-tgt {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: rgba(255,255,255,0.38);
+}
+/* Mini KD count row */
+.lnd-pc-counts {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 2px;
+}
+.lnd-pc-counts span {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+/* Legacy prog name/metric (replaced by lnd-pc-* classes) */
+.lnd-prog-name   { display: none; }
+.lnd-prog-metric { display: none; }
+/* Donut center re-enabled */
+.lnd-prog-donut-center { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; flex-direction: column; }
+.lnd-prog-dc-lbl       { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: rgba(255,255,255,0.32); margin-top: 1px; }
 .lnd-prog-empty { font-family: 'Inter', sans-serif; font-size: 13px; color: rgba(255,255,255,0.25); margin: 0; }
 
 /* ── Expand button ──────────────────────────────────────────────── */
@@ -1217,7 +1423,7 @@ button.lnd-pill:focus-visible { outline: 2px solid #00b5cc; outline-offset: 2px;
   cursor: pointer;
   transition: background 0.15s, border-color 0.15s, color 0.15s;
   white-space: nowrap;
-  align-self: flex-start;
+  margin-left: auto;
   flex-shrink: 0;
 }
 .lnd-report-btn:hover {
