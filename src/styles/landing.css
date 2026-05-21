@@ -159,6 +159,8 @@
   flex: 1;
   min-height: 0;
   overflow: hidden;
+  /* Hard clip — no card content bleeds outside the reel boundary */
+  clip-path: inset(0);
 }
 
 /* ── Individual card — glass notepad ─────────────────────────────── */
@@ -511,22 +513,14 @@
   border-left:   1.5px solid rgba(0,181,204,0.32) !important;
   border-radius: 14px !important;
 
-  /* 3D depth: glass rim highlight + inner edge shadows + outer lift */
+  /* 3D depth: glass rim highlight + inner edge shadows, no floor bleed */
   box-shadow:
-    /* glass rim — white sheen on top inner edge */
     inset 0  2px  6px  rgba(255,255,255,0.09),
-    /* left wall highlight */
     inset  2px 0  8px  rgba(0,181,204,0.06),
-    /* right wall shadow */
     inset -2px 0  8px  rgba(0,0,0,0.22),
-    /* bottom inner recess */
     inset 0 -3px 10px  rgba(0,0,0,0.35),
-    /* outer lift layers */
     0  2px  6px  rgba(0,0,0,0.40),
-    0  8px  24px rgba(0,0,0,0.52),
-    0 24px  64px rgba(0,0,0,0.62),
-    /* teal floor glow */
-    0 40px  80px rgba(0,181,204,0.06) !important;
+    0  6px  18px rgba(0,0,0,0.48) !important;
 
   clip-path: none !important;
   filter: none !important;
@@ -564,10 +558,7 @@
     inset -2px 0 10px  rgba(0,0,0,0.28),
     inset 0 -3px 12px  rgba(0,0,0,0.42),
     0  4px  12px rgba(0,0,0,0.48),
-    0 12px  36px rgba(0,0,0,0.60),
-    0 32px  80px rgba(0,0,0,0.70),
-    0  0   72px rgba(0,181,204,0.16),
-    0 48px 100px rgba(0,181,204,0.08) !important;
+    0  8px  24px rgba(0,0,0,0.55) !important;
 
   filter: none !important;
 }
