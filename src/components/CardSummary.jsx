@@ -122,15 +122,15 @@ function getWorstKD(divisionId, progId) {
 }
 
 const SEG_COLORS = {
-  gap:      '#E5293D',   // vivid crimson-red
-  close:    '#D97706',   // vivid amber
-  achieved: '#16A34A',   // vivid green
+  gap:      '#EF4444',   // red-500
+  close:    '#EAB308',   // yellow-500
+  achieved: '#22C55E',   // green-500
 };
 
 const SEG_GLOW = {
-  gap:      'rgba(229,41,61,',
-  close:    'rgba(217,119,6,',
-  achieved: 'rgba(22,163,74,',
+  gap:      'rgba(239,68,68,',
+  close:    'rgba(234,179,8,',
+  achieved: 'rgba(34,197,94,',
 };
 
 const SEG_LABELS = {
