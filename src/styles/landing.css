@@ -1148,7 +1148,9 @@ button.lnd-pill:focus-visible { outline: 2px solid #00b5cc; outline-offset: 2px;
 }
 
 /* Card dimensions: fit within the available reel-wrap height so nothing
-   gets clipped by overflow:hidden. 200px budget covers header + dot nav. */
+   gets clipped by overflow:hidden. 200px budget covers header + dot nav.
+   Bottom padding is 10px to match the indicator panel's absolute bottom
+   clearance — lets the prog section bottom edge align with it. */
 .lnd-card {
   width:  min(1200px, calc(100vw - 80px)) !important;
   height: min(980px, calc(100dvh - 200px)) !important;
@@ -1157,7 +1159,7 @@ button.lnd-pill:focus-visible { outline: 2px solid #00b5cc; outline-offset: 2px;
   padding:
     clamp(28px, 3.5vh, 44px)
     calc(var(--lnd-ind-w) + 24px)
-    clamp(18px, 2.5vh, 44px)
+    10px
     clamp(44px, 4.5vw, 68px) !important;
 
   gap: clamp(10px, 1.4vh, 18px) !important;
@@ -1171,13 +1173,13 @@ button.lnd-pill:focus-visible { outline: 2px solid #00b5cc; outline-offset: 2px;
 }
 
 /* Programme grid fills remaining card height.
-   42vh tracks viewport height so the section consumes all available
-   flex space — the indicator panel and prog section now share the same
-   visual bottom edge.  Cap at 440px keeps programme cards from being
-   excessively tall on very large displays. */
+   max(200px, 100dvh - 427px) is always >= available flex space so flex:1
+   governs; the prog section bottom edge aligns with the indicator panel.
+   Derivation: card budget(200) + top-pad(~32) + fixed-elements(195) +
+   bot-pad(10) = ~437px overhead; minus 10px for panel clearance = 427px. */
 .lnd-prog-section {
   min-height: 120px !important;
-  max-height: clamp(200px, 42vh, 440px) !important;
+  max-height: max(200px, calc(100dvh - 427px)) !important;
 }
 
 /* Large monitor / 1080p projector (1920px+): wider card, larger panel */
@@ -1188,7 +1190,8 @@ button.lnd-pill:focus-visible { outline: 2px solid #00b5cc; outline-offset: 2px;
     height: min(1000px, calc(100dvh - 200px)) !important;
   }
   .lnd-card-name    { font-size: 34px !important; }
-  .lnd-prog-section { max-height: clamp(240px, 42vh, 520px) !important; }
+  /* Larger card needs a larger prog section ceiling */
+  .lnd-prog-section { max-height: clamp(240px, calc(100dvh - 440px), 620px) !important; }
 }
 
 /* Tablet / small laptop (<=1100px): hide right panel, full-width layout */
@@ -1200,7 +1203,7 @@ button.lnd-pill:focus-visible { outline: 2px solid #00b5cc; outline-offset: 2px;
     gap: 10px !important;
   }
   .lnd-ind-card     { display: none !important; }
-  .lnd-prog-section { max-height: clamp(140px, 38vh, 320px) !important; }
+  .lnd-prog-section { max-height: clamp(140px, calc(100dvh - 420px), 340px) !important; }
   .lnd-card-name    { font-size: 24px !important; }
   .lnd-card-idx     { font-size: 24px !important; }
 }
