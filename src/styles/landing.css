@@ -644,28 +644,32 @@
    LIGHT MODE OVERRIDES — landing.css  (black & orange, clean neutral bg)
    ════════════════════════════════════════════════════════════════════ */
 
-/* ── Landing navbar ─────────────────────────────────────────────── */
+/* ── Landing navbar — solid black + orange accent (matches summary navbar) */
 [data-theme="light"] .lnd-header-inner {
-  background: rgba(255,255,255,0.96);
-  border-color: rgba(255,85,0,0.25);
+  background: #1A1610;
+  border-color: rgba(255,85,0,0.30);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.95),
-    0 4px 20px rgba(26,22,16,0.10);
+    inset 0 1px 0 rgba(255,255,255,0.06),
+    0 4px 24px rgba(0,0,0,0.22),
+    0 0 0 1px rgba(255,85,0,0.12);
 }
 [data-theme="light"] .lnd-header-inner::before { display: none; }
 
-[data-theme="light"] .lnd-brand-name   { color: #1A1610; text-shadow: none; }
-[data-theme="light"] .lnd-brand-sub    { color: rgba(26,22,16,0.50); }
-[data-theme="light"] .lnd-header-label { color: rgba(26,22,16,0.55); letter-spacing: 0.10em; }
+[data-theme="light"] .lnd-brand-name   { color: #FFFFFF; text-shadow: none; }
+[data-theme="light"] .lnd-brand-sub    { color: rgba(255,255,255,0.50); }
+[data-theme="light"] .lnd-header-label { color: rgba(255,255,255,0.45); letter-spacing: 0.10em; }
 
 [data-theme="light"] .lnd-summary-btn {
-  background: rgba(255,85,0,0.09);
-  border: 1px solid rgba(255,85,0,0.30);
-  color: #C04000;
+  background: rgba(255,85,0,0.18);
+  border: 1px solid rgba(255,85,0,0.45);
+  color: #FF5500;
 }
 [data-theme="light"] .lnd-summary-btn:hover {
-  background: rgba(255,85,0,0.16);
-  border-color: rgba(255,85,0,0.55);
+  background: rgba(255,85,0,0.28);
+  border-color: rgba(255,85,0,0.70);
+  color: #FF7733;
 }
 
 /* ── Cinema reel cards ──────────────────────────────────────────── */
