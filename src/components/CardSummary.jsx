@@ -332,7 +332,7 @@ export default function CardSummary({ divisionId, programmes = [], activeFilter,
           />
           <div className="lnd-ind-center">
             <span ref={totalNumRef} className="lnd-ind-total-num">{brk.total}</span>
-            <span className="lnd-ind-total-lbl">KDs</span>
+            <span className="lnd-ind-total-lbl">Indicators</span>
           </div>
         </div>
 
@@ -449,7 +449,7 @@ export default function CardSummary({ divisionId, programmes = [], activeFilter,
                   />
                   <div className="lnd-prog-donut-center">
                     <span ref={el => { progNumRefs.current[i] = el; }}>{totalKDs}</span>
-                    <span className="lnd-prog-dc-lbl">KDs</span>
+                    <span className="lnd-prog-dc-lbl">Indicators</span>
                   </div>
                 </div>
 

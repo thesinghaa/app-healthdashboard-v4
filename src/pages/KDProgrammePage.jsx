@@ -42,7 +42,7 @@ function SummaryChips({ kds }) {
   const gap      = kds.filter(k => kdStatus(k) === 'gap').length;
 
   const chips = [
-    { label: 'Total KDs',    value: total,    color: '#334155', bg: '#F1F5F9' },
+    { label: 'Total Indicators', value: total,    color: '#334155', bg: '#F1F5F9' },
     { label: 'Achieved',     value: achieved, color: '#059669', bg: '#ECFDF5' },
     { label: 'Near Target',  value: close,    color: '#D97706', bg: '#FFFBEB' },
     { label: 'Gap',          value: gap,      color: '#DC2626', bg: '#FEF2F2' },

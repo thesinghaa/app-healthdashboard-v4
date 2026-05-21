@@ -71,7 +71,7 @@ function KDRow({ kd, color }) {
   return (
     <div className="kd-row">
       <div className="kd-row-top">
-        <span className="kd-no" style={{ background: color + '18', color }}>KD {kd.no}</span>
+        <span className="kd-no" style={{ background: color + '18', color }}>Indicator {kd.no}</span>
         <span className="kd-type-pill">{kd.type}</span>
         <span className="kd-status-dot" style={{ background: statusColor }} title={statusLabel} />
       </div>
@@ -388,7 +388,7 @@ export default function KDDetailPage({ indicator, catCfg, rawRows, activeYear, p
               </div>
               <div className="kd-summary-row">
                 {[
-                  { label: 'Total KDs', val: kds.length, color: '#475569' },
+                  { label: 'Total Indicators', val: kds.length, color: '#475569' },
                   { label: 'Achieved', val: kds.filter(k => {
                     if (k.achievement === null || k.target === null) return false;
                     return k.lowerIsBetter ? k.achievement <= k.target : k.achievement >= k.target;

@@ -417,7 +417,7 @@ export default function KDIndicatorDetail({ indicator, program, division, onBack
           <div className="kdi-meta-strip">
             <div className="kdi-meta-top">
               <span className="kdi-no-badge" style={{ background:`${stColor}18`, color:stColor }}>
-                KD {indicator?.no}
+                Indicator {indicator?.no}
               </span>
               <span className="kdi-type-pill">{indicator?.type}</span>
               <span className="kdi-source-tag">Source: {indicator?.source}</span>
