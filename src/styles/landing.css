@@ -788,6 +788,15 @@
   border-color: rgba(255,85,0,0.35) !important;
   background: rgba(255,85,0,0.07) !important;
 }
+[data-theme="light"] .lnd-ind-cta::after {
+  background: linear-gradient(
+    105deg,
+    transparent 30%,
+    rgba(255,85,0,0.18) 50%,
+    transparent 70%
+  );
+  background-size: 200% 100%;
+}
 
 /* ── Programme section container ───────────────────────────────── */
 [data-theme="light"] .lnd-prog-section {
@@ -1135,11 +1144,11 @@
 }
 .lnd-ind-cta {
   margin-top: auto;
-  width: 100%;
+  align-self: stretch;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 20px;
+  padding: 12px 20px;
   background: rgba(0,181,204,0.10);
   border: 1.5px solid #00b5cc;
   border-radius: 10px;
