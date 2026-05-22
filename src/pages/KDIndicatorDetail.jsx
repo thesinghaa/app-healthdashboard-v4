@@ -264,7 +264,14 @@ function DistrictMap({ distData, isLight }) {
         width: 1.2,
       },
     },
-    hovertemplate: '<b>%{location}</b><br><br>%{z:,}<extra></extra>',
+    hovertemplate: [
+      '<span style="font-size:10px;letter-spacing:1.2px;color:rgba(255,255,255,0.50)">DISTRICT</span>',
+      '<br><b style="font-size:15px">%{location}</b>',
+      '<br><span style="color:rgba(255,255,255,0.25)">────────────</span>',
+      '<br><span style="font-size:10px;letter-spacing:1.2px;color:rgba(255,255,255,0.50)">VALUE</span>',
+      '<br><b style="font-size:18px">%{z:,}</b>',
+      '<extra></extra>',
+    ].join(''),
   };
 
   const labelTrace = {
