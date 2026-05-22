@@ -266,7 +266,9 @@ body{font-family:'Inter',sans-serif;font-size:14px;line-height:1.6;color:#1e293b
 /* ── Priority cards ─────────────────────────────────────────────── */
 .priority-card{border:1px solid #e8ecf0;border-top:3px solid #dc2626;border-radius:12px;padding:26px 28px;margin-bottom:20px;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04)}
 .priority-card--caution{border-top-color:#d97706}
-.priority-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.priority-card-header{display:flex;align-items:center;justify-content:space-between;margin:-26px -28px 20px;padding:20px 28px;border-bottom:1px solid rgba(0,0,0,.07)}
+.pch-red{background:linear-gradient(90deg,rgba(220,38,38,.07) 0%,rgba(220,38,38,.02) 60%,transparent 100%)}
+.pch-yellow{background:linear-gradient(90deg,rgba(217,119,6,.07) 0%,rgba(217,119,6,.02) 60%,transparent 100%);border-bottom-color:rgba(217,119,6,.14)}
 .priority-prog-name{font-size:15px;font-weight:700;color:#0a1628}
 .kd-data-table{width:100%;border-collapse:collapse;font-size:12.5px;margin:14px 0 18px}
 .kd-data-table th{background:#f8fafc;color:#64748b;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;padding:8px 14px;text-align:left;border-bottom:1px solid #e2e8f0}
@@ -281,14 +283,13 @@ body{font-family:'Inter',sans-serif;font-size:14px;line-height:1.6;color:#1e293b
 /* ── What is working ────────────────────────────────────────────── */
 .working-list{list-style:none;display:flex;flex-direction:column;gap:10px}
 .working-item{display:flex;gap:14px;align-items:flex-start;padding:16px 20px;background:#f0fdf4;border:1px solid #bbf7d0;border-left:3px solid #16a34a;border-radius:10px}
-.working-icon{flex-shrink:0;width:24px;height:24px;background:#16a34a;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-top:1px}
-.working-icon svg{width:12px;height:12px}
+.working-num{flex-shrink:0;width:28px;height:28px;background:#15803d;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:#fff;margin-top:1px;letter-spacing:0}
 .working-text{font-size:13.5px;line-height:1.65;color:#14532d;font-weight:500}
 
 /* ── Recommendations ────────────────────────────────────────────── */
 .rec-list{display:flex;flex-direction:column;gap:12px}
 .rec-item{display:grid;grid-template-columns:52px 1fr;background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.05)}
-.rec-num-col{background:#FF5500;display:flex;align-items:center;justify-content:center;padding:20px 0}
+.rec-num-col{background:linear-gradient(160deg,#FF5500 0%,#c94200 100%);display:flex;align-items:center;justify-content:center;padding:20px 0}
 .rec-num-val{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:#fff}
 .rec-body{padding:18px 22px}
 .rec-text{font-size:13.5px;line-height:1.7;color:#1e293b;font-weight:500}
@@ -305,6 +306,15 @@ body{font-family:'Inter',sans-serif;font-size:14px;line-height:1.6;color:#1e293b
 .appendix-table tr.prog-divider td{background:#0a1628;color:rgba(255,255,255,.80);font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.08em;padding:9px 14px;border-bottom:none}
 .appendix-table tr:last-child td{border-bottom:none}
 .kd-no{font-family:'JetBrains Mono',monospace;font-size:10px;color:#94a3b8}
+
+/* Scorecard row status stripe */
+.srow-red td:first-child{border-left:3px solid #dc2626;padding-left:13px}
+.srow-yellow td:first-child{border-left:3px solid #d97706;padding-left:13px}
+.srow-green td:first-child{border-left:3px solid #16a34a;padding-left:13px}
+.srow-neutral td:first-child{border-left:3px solid #e2e8f0;padding-left:13px}
+
+/* Appendix programme divider accent */
+.appendix-table tr.prog-divider td:first-child{border-left:3px solid #FF5500}
 
 /* ── Footer ─────────────────────────────────────────────────────── */
 .report-footer{margin-top:52px;padding-top:20px;border-top:2px solid #e2e8f0;display:flex;justify-content:space-between;align-items:center;font-size:11px;color:#94a3b8;font-family:'JetBrains Mono',monospace;letter-spacing:.03em}
@@ -374,7 +384,7 @@ function scorecardSection(programmes) {
       p.counts.achieved > 0 ? `<span class="kd-chip kd-chip-green">${p.counts.achieved} on track</span>` : '',
     ].filter(Boolean).join('');
 
-    return `<tr>
+    return `<tr class="srow-${p.status}">
       <td><span class="prog-name">${esc(p.name)}</span></td>
       <td>${statusBadge(p.status)}</td>
       <td><div class="kd-chips">${chips || '<span style="color:#94a3b8">—</span>'}</div></td>
@@ -427,7 +437,7 @@ function prioritySection(programmes, analyses) {
     const analysis = analyses[p.id];
 
     return `<div class="${cardClass}">
-      <div class="priority-card-header">
+      <div class="priority-card-header ${isCritical ? 'pch-red' : 'pch-yellow'}">
         <span class="priority-prog-name">${esc(p.name)}</span>
         ${statusBadge(p.status)}
       </div>
@@ -454,8 +464,6 @@ function prioritySection(programmes, analyses) {
 }
 
 function workingSection(workingText, programmes) {
-  const checkIcon = `<svg viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-
   let bullets = workingText
     .split('\n')
     .map(l => l.replace(/^[-•*]\s*/, '').trim())
@@ -470,9 +478,9 @@ function workingSection(workingText, programmes) {
 
   if (!bullets.length) bullets = ['No programmes have met all targets in the current reporting period.'];
 
-  const items = bullets.slice(0, 5).map(b => `
+  const items = bullets.slice(0, 5).map((b, i) => `
     <li class="working-item">
-      <div class="working-icon">${checkIcon}</div>
+      <div class="working-num">${i + 1}</div>
       <span class="working-text">${esc(b)}</span>
     </li>`).join('');
 
