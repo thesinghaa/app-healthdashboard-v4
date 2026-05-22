@@ -233,21 +233,19 @@ function DistrictMap({ distData, isLight }) {
   }
   const centroids = features.map(centroid);
 
-  /* Heatmap — light mode: dark oranges on white bg (max contrast)
-                dark mode: bright blues on dark bg (max contrast)  */
+  /* Light mode: all-dark orange range (every district visible on white bg)
+     Dark mode:  all-light blue range  (every district visible on dark bg) */
   const SCALE_LIGHT = [
-    [0,    '#FEF3C7'],   // pale yellow — lowest (subtle on white)
-    [0.25, '#FCD34D'],   // yellow-amber
-    [0.50, '#F97316'],   // vivid orange
-    [0.75, '#C2410C'],   // deep burnt orange
-    [1,    '#431407'],   // near-black red — highest (max contrast)
+    [0,    '#D97706'],   // amber — lowest dark (clearly visible on white)
+    [0.33, '#C2410C'],   // burnt orange
+    [0.66, '#9A3412'],   // deep red-orange
+    [1,    '#1C0500'],   // near-black — highest
   ];
   const SCALE_DARK = [
-    [0,    '#0F172A'],   // near-black — lowest (blends with dark bg)
-    [0.25, '#1E40AF'],   // dark blue
-    [0.50, '#3B82F6'],   // vivid blue
-    [0.75, '#93C5FD'],   // light blue
-    [1,    '#EFF6FF'],   // near-white — highest (max contrast)
+    [0,    '#93C5FD'],   // sky blue — lowest light (clearly visible on dark bg)
+    [0.33, '#A5B4FC'],   // light indigo
+    [0.66, '#C7D2FE'],   // pale indigo
+    [1,    '#F8FAFC'],   // near-white — highest
   ];
 
   const choropleth = {
