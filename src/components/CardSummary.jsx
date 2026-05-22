@@ -542,6 +542,7 @@ export default function CardSummary({ divisionId, programmes = [], activeFilter,
                   ref={el => { progDonutRefs.current[i] = el; }}
                   style={{
                     flexShrink: 0,
+                    alignSelf: 'center',
                     filter: `drop-shadow(0 0 10px ${SEG_GLOW[glowSeg]}0.28)) drop-shadow(0 0 4px ${SEG_GLOW[glowSeg]}0.18))`,
                   }}
                 >
