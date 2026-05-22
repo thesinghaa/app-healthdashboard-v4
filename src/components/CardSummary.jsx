@@ -354,7 +354,7 @@ export default function CardSummary({ divisionId, programmes = [], activeFilter,
 
   /* ── custom SVG indicator donut (glow + rounded caps) ──────── */
   const indSegments = useMemo(() => {
-    const CX = 80, CY = 80, R = 58, SW = 15;
+    const CX = 100, CY = 100, R = 72, SW = 19;
     const tot = Math.max(1, brk.gap + brk.close + brk.achieved);
     let deg = 0;
     return ['gap', 'close', 'achieved'].map(k => {
@@ -405,15 +405,15 @@ export default function CardSummary({ divisionId, programmes = [], activeFilter,
         </div>
 
         {/* Donut — custom SVG, glow + rounded caps */}
-        <div ref={indDonutRef} style={{ position: 'relative', width: 160, height: 160, margin: '0 auto' }}>
-          <svg width="160" height="160" viewBox="0 0 160 160" style={{ display: 'block', overflow: 'visible' }}>
+        <div ref={indDonutRef} style={{ position: 'relative', width: 200, height: 200, margin: '0 auto' }}>
+          <svg width="200" height="200" viewBox="0 0 200 200" style={{ display: 'block', overflow: 'visible' }}>
             <defs>
               <filter id="ind-glow-gap"      x="-60%" y="-60%" width="220%" height="220%"><feDropShadow dx="0" dy="0" stdDeviation="5" floodColor="var(--seg-gap)"      floodOpacity="0.75"/></filter>
               <filter id="ind-glow-close"    x="-60%" y="-60%" width="220%" height="220%"><feDropShadow dx="0" dy="0" stdDeviation="5" floodColor="var(--seg-close)"    floodOpacity="0.65"/></filter>
               <filter id="ind-glow-achieved" x="-60%" y="-60%" width="220%" height="220%"><feDropShadow dx="0" dy="0" stdDeviation="5" floodColor="var(--seg-achieved)" floodOpacity="0.65"/></filter>
             </defs>
             {/* track ring */}
-            <circle cx="80" cy="80" r="58" fill="none" stroke="var(--seg-track)" strokeWidth="15"/>
+            <circle cx="100" cy="100" r="72" fill="none" stroke="var(--seg-track)" strokeWidth="19"/>
             {/* segments */}
             {indSegments.map(({ k, d, SW }) => (
               <path
