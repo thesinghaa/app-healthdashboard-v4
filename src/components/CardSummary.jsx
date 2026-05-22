@@ -568,12 +568,6 @@ export default function CardSummary({ divisionId, programmes = [], activeFilter,
                   </div>
                 )}
 
-                {/* Mini counts */}
-                <div className="lnd-pc-counts">
-                  {pb.gap      > 0 && <span style={{ color: SEG_COLORS.gap      }}>{pb.gap} gap</span>}
-                  {pb.close    > 0 && <span style={{ color: SEG_COLORS.close    }}>{pb.close} caution</span>}
-                  {pb.achieved > 0 && <span style={{ color: SEG_COLORS.achieved }}>{pb.achieved} ok</span>}
-                </div>
               </div>
             );
           })}
