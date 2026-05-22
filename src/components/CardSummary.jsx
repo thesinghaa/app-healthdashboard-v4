@@ -208,7 +208,7 @@ function ProgGauge({ gap, close, achieved }) {
       {/* KD count label */}
       <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, textAlign: 'center', lineHeight: 1.25 }}>
         <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 15, fontWeight: 700, color: 'var(--ink, #1e293b)' }}>{total}</div>
-        <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 7.5, fontWeight: 600, color: 'var(--ink-faint, #94a3b8)', letterSpacing: '0.09em', textTransform: 'uppercase' }}>KDs</div>
+        <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 7.5, fontWeight: 600, color: 'var(--ink, #1e293b)', letterSpacing: '0.09em', textTransform: 'uppercase', opacity: 0.55 }}>Indicators</div>
       </div>
     </div>
   );
