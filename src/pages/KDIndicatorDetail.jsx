@@ -211,7 +211,7 @@ const AP_ZOOM = [
 ];
 
 function DistrictMap({ distData, isLight }) {
-  const [zoom, setZoom] = useState(0);
+  const [zoom, setZoom] = useState(1);
 
   const valueMap   = Object.fromEntries(distData.map(d => [d.district, d.value]));
   const stateTotal = distData.reduce((s, d) => s + d.value, 0) || 1;
