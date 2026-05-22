@@ -5403,6 +5403,9 @@ h1, h2, h3, h4 {
   .nfhs-diff--heat  { align-self: flex-start; }
 }
 
+/* ── NFHS label font size ────────────────────────────────────────── */
+.kdi-nfhs-label { font-size: 15px; }
+
 /* ── NFHS head — orange bar, black text ──────────────────────────── */
 .kdi-nfhs-head,
 [data-theme="light"] .kdi-nfhs-head,
