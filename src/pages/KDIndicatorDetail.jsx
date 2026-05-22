@@ -2,6 +2,8 @@ import { useRef, useEffect, useState, useMemo } from 'react';
 import { gsap } from 'gsap';
 import ThemeToggle from '../components/ThemeToggle';
 import Plot from 'react-plotly.js';
+import { useTheme } from '../context/ThemeContext';
+import apDistricts from '../data/apDistricts.json';
 import {
   AreaChart, Area,
   XAxis, YAxis, CartesianGrid, Tooltip,
@@ -20,6 +22,8 @@ const DISTRICTS    = [
   'Lower Dibang Valley','Lower Siang','Lower Subansiri','Namsai',
   'Pakke Kessang','Papum Pare','Shi Yomi','Siang','Tawang','Tirap',
   'Upper Siang','Upper Subansiri','West Kameng','West Siang',
+  // Newer districts (created 2022–2024; HMIS sheet not yet updated for these)
+  'Bichom','Keyi Panyor',
 ];
 
 /* ── Status helpers ──────────────────────────────────────────────── */
@@ -195,66 +199,227 @@ function PlotlyFYChart({ indicator, status }) {
   );
 }
 
+/* ── District Choropleth Map ──────────────────────────────────── */
+const AP_CX = 94.45, AP_CY = 28.05;            // AP centroid
+const AP_SCALES = [52, 78, 117, 175, 263];     // projection.scale at each zoom step
+
+function DistrictMap({ distData, isLight }) {
+  const [zoom, setZoom] = useState(0);
+
+  const valueMap   = Object.fromEntries(distData.map(d => [d.district, d.value]));
+  const stateTotal = distData.reduce((s, d) => s + d.value, 0) || 1;
+  const features   = apDistricts.features;
+  const names      = features.map(f => f.properties.DISTRICT);
+  const values     = names.map(n => valueMap[n] ?? null);
+  const validVals  = values.filter(v => v != null);
+  const maxVal     = validVals.length > 0 ? validVals.reduce((a, b) => Math.max(a, b), 0) : 1;
+
+  /* Centroids: mean of exterior ring coordinates */
+  function centroid(f) {
+    const coords = f.geometry.type === 'Polygon'
+      ? f.geometry.coordinates[0]
+      : f.geometry.coordinates.reduce((best, poly) =>
+          poly[0].length > best.length ? poly[0] : best, []);
+    const lon = coords.reduce((s, p) => s + p[0], 0) / coords.length;
+    const lat = coords.reduce((s, p) => s + p[1], 0) / coords.length;
+    return [lon, lat];
+  }
+  const centroids = features.map(centroid);
+
+  const projScale = AP_SCALES[zoom];
+
+  const choropleth = {
+    type: 'choropleth',
+    geojson: apDistricts,
+    featureidkey: 'properties.DISTRICT',
+    locations: names,
+    z: values,
+    colorscale: [
+      [0,   '#1E3A5F'],
+      [0.4, '#D97706'],
+      [1,   '#7C3AED'],
+    ],
+    zmin: 0,
+    zmax: maxVal,
+    showscale: false,
+    marker: {
+      line: {
+        color: isLight ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.25)',
+        width: 1.2,
+      },
+    },
+    hovertemplate: '<b>%{location}</b><br>%{z:,}<extra></extra>',
+  };
+
+  const labelTrace = {
+    type: 'scattergeo',
+    mode: 'text',
+    lon: centroids.map(c => c[0]),
+    lat: centroids.map(c => c[1]),
+    text: names.map(n => {
+      const v = valueMap[n];
+      return v != null ? `${Math.round((v / stateTotal) * 100)}%` : '';
+    }),
+    textfont: { family: "'JetBrains Mono', monospace", size: zoom >= 3 ? 11 : zoom >= 1 ? 9 : 8, color: '#ffffff' },
+    hoverinfo: 'skip',
+    showlegend: false,
+  };
+
+  const layout = {
+    geo: {
+      visible: false,
+      projection: { type: 'mercator', scale: projScale },
+      center: { lon: AP_CX, lat: AP_CY },
+      bgcolor: 'transparent',
+      domain: { x: [0, 1], y: [0, 1] },
+    },
+    paper_bgcolor: 'transparent',
+    plot_bgcolor:  'transparent',
+    margin: { t: 0, b: 0, l: 0, r: 0 },
+    height: 270,
+    hoverlabel: {
+      bgcolor:     isLight ? 'rgba(15,23,42,0.92)' : 'rgba(5,7,18,0.96)',
+      bordercolor: 'rgba(0,181,204,0.50)',
+      font: { color: '#ffffff', size: 11, family: "'JetBrains Mono', monospace" },
+    },
+  };
+
+  const btnBase = {
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    width: 32, height: 32, borderRadius: 6, border: 'none', cursor: 'pointer',
+    fontSize: 20, lineHeight: 1, fontWeight: 600,
+    background: isLight ? 'rgba(255,255,255,0.88)' : 'rgba(30,40,60,0.88)',
+    color:      isLight ? '#1E293B'                 : '#E2E8F0',
+    boxShadow:  '0 2px 8px rgba(0,0,0,0.18)',
+    backdropFilter: 'blur(6px)',
+    transition: 'opacity .15s',
+  };
+
+  return (
+    <div className="dist-chart-wrap" style={{ position: 'relative' }}>
+      <Plot
+        data={[choropleth, labelTrace]}
+        layout={layout}
+        config={{ displayModeBar: false, responsive: true }}
+        style={{ width: '100%' }}
+        useResizeHandler
+      />
+      {/* Zoom controls */}
+      <div style={{
+        position: 'absolute', bottom: 20, left: 20,
+        display: 'flex', flexDirection: 'column', gap: 6,
+        zIndex: 10,
+      }}>
+        <button
+          style={{ ...btnBase, opacity: zoom >= AP_SCALES.length - 1 ? 0.35 : 1 }}
+          onClick={() => setZoom(z => Math.min(z + 1, AP_SCALES.length - 1))}
+          disabled={zoom >= AP_SCALES.length - 1}
+          title="Zoom in"
+        >+</button>
+        <button
+          style={{ ...btnBase, opacity: zoom <= 0 ? 0.35 : 1 }}
+          onClick={() => setZoom(z => Math.max(z - 1, 0))}
+          disabled={zoom <= 0}
+          title="Zoom out"
+        >−</button>
+      </div>
+    </div>
+  );
+}
+
 /* ── Chart 2: NFHS Baseline Comparison (Public Data) ─────────── */
 function PlotlyNFHSChart({ indicator, nfhsRows }) {
-  const target = indicator?.target;
-  const unit   = indicator?.unit ?? '%';
+  const { theme } = useTheme();
+  const isLight   = theme === 'light';
 
   const nfhs5Row = nfhsRows?.find(r => r.unit === '%' && r.nfhs5 != null);
   const nfhs4Row = nfhsRows?.find(r => r.unit === '%' && r.nfhs4 != null);
   const n5Pct    = nfhs5Row ? Math.min(Math.max(nfhs5Row.nfhs5, 0), 100) : null;
   const n4Pct    = nfhs4Row ? Math.min(Math.max(nfhs4Row.nfhs4, 0), 100) : null;
 
-  const centerVal = n5Pct != null ? `${n5Pct.toFixed(1)}%` : 'N/A';
+  const textColor  = isLight ? '#1E293B' : '#E2E8F0';
+  const tickColor  = isLight ? '#475569' : '#94A3B8';
+  const gridColor  = isLight ? 'rgba(0,0,0,0.07)' : 'rgba(255,255,255,0.07)';
+  const restColor  = isLight ? 'rgba(0,0,0,0.06)'  : 'rgba(255,255,255,0.08)';
 
-  const trace = {
-    type: 'sunburst',
-    ids:     ['root', 'n5', 'n4', 'n5-a', 'n5-r', 'n4-a', 'n4-r'],
-    labels:  ['', 'NFHS-5', 'NFHS-4',
-               `${(n5Pct ?? 0).toFixed(1)}%`, '',
-               `${(n4Pct ?? 0).toFixed(1)}%`, ''],
-    parents: ['', 'root', 'root', 'n5', 'n5', 'n4', 'n4'],
-    values:  [200, 100, 100,
-               n5Pct ?? 50, n5Pct != null ? 100 - n5Pct : 50,
-               n4Pct ?? 50, n4Pct != null ? 100 - n4Pct : 50],
-    branchvalues: 'total',
+  const yLabels = ['NFHS-4 (2015–16)', 'NFHS-5 (2019–21)'];
+
+  /* achieved bars */
+  const barTrace = {
+    type: 'bar',
+    orientation: 'h',
+    y: yLabels,
+    x: [n4Pct ?? 0, n5Pct ?? 0],
     marker: {
-      colors: ['rgba(0,0,0,0)',
-               N5_PAL.branch, N4_PAL.branch,
-               N5_PAL.leaf, N5_PAL.empty,
-               N4_PAL.leaf, N4_PAL.empty],
-      line: { color: '#ffffff', width: 2 },
+      color: [N4_PAL.leaf, N5_PAL.leaf],
+      line: { color: 'transparent', width: 0 },
     },
-    hovertemplate: [
-      '<extra></extra>',
-      '<b>NFHS-5 (2019-21)</b><extra></extra>',
-      '<b>NFHS-4 (2015-16)</b><extra></extra>',
-      `<b>NFHS-5</b><br>${nfhs5Row?.nfhs5}${nfhs5Row?.unit ?? ''}<extra></extra>`,
-      '<b>NFHS-5 Remaining</b><extra></extra>',
-      `<b>NFHS-4</b><br>${nfhs4Row?.nfhs4 ?? 'N/A'}${nfhs4Row?.unit ?? ''}<extra></extra>`,
-      '<b>NFHS-4 Remaining</b><extra></extra>',
+    text: [
+      n4Pct != null ? `<b>${n4Pct.toFixed(1)}%</b>` : 'N/A',
+      n5Pct != null ? `<b>${n5Pct.toFixed(1)}%</b>` : 'N/A',
     ],
-    textfont: { family: "'Inter', sans-serif", size: 13, color: '#ffffff' },
-    insidetextorientation: 'radial',
-    leaf: { opacity: 1 },
+    textposition: 'outside',
+    textfont: { family: "'JetBrains Mono', monospace", size: 13, color: textColor },
+    hovertemplate: '%{y}: <b>%{x:.1f}%</b><extra></extra>',
+    cliponaxis: false,
+    showlegend: false,
   };
 
+  /* remaining (background) bars */
+  const restTrace = {
+    type: 'bar',
+    orientation: 'h',
+    y: yLabels,
+    x: [100 - (n4Pct ?? 0), 100 - (n5Pct ?? 0)],
+    marker: { color: restColor, line: { color: 'transparent', width: 0 } },
+    hoverinfo: 'skip',
+    showlegend: false,
+  };
+
+  const shapes = [];
+  if (indicator?.target != null) {
+    shapes.push({
+      type: 'line',
+      x0: indicator.target, x1: indicator.target,
+      y0: -0.5, y1: 1.5,
+      line: { color: '#22C55E', width: 2, dash: 'dot' },
+    });
+  }
+
   const layout = {
-    paper_bgcolor: 'transparent', plot_bgcolor: 'transparent',
-    margin: { t: 10, b: 10, l: 10, r: 10 }, height: 340,
-    annotations: [{
-      x: 0.5, y: 0.5, xref: 'paper', yref: 'paper',
-      text: `<b>${centerVal}</b><br><span style="font-size:12px;color:#64748B">NFHS-5</span>`,
-      showarrow: false,
-      font: { family: "'JetBrains Mono', monospace", size: 28, color: N5_PAL.branch },
-      align: 'center',
-    }],
+    barmode: 'stack',
+    paper_bgcolor: 'transparent',
+    plot_bgcolor:  'transparent',
+    margin: { t: 12, b: 36, l: 140, r: 64 },
+    height: 170,
+    bargap: 0.38,
+    xaxis: {
+      range: [0, 115],
+      ticksuffix: '%',
+      tickfont: { family: "'Inter', sans-serif", size: 11, color: tickColor },
+      gridcolor: gridColor,
+      showline: false,
+      zeroline: false,
+    },
+    yaxis: {
+      tickfont: { family: "'Inter', sans-serif", size: 12, color: textColor },
+      showgrid: false,
+      showline: false,
+      automargin: true,
+    },
+    shapes,
+    showlegend: false,
   };
 
   return (
     <div className="sunburst-wrap">
-      <Plot data={[trace]} layout={layout} config={{ displayModeBar: false, responsive: true }}
-        style={{ width: '100%' }} useResizeHandler />
+      <Plot
+        data={[restTrace, barTrace]}
+        layout={layout}
+        config={{ displayModeBar: false, responsive: true }}
+        style={{ width: '100%' }}
+        useResizeHandler
+      />
       <div className="sb-legend">
         {n5Pct != null && (
           <div className="sb-leg-item">
@@ -299,6 +464,9 @@ export default function KDIndicatorDetail({ indicator, program, division, onBack
   const [rawRows,    setRawRows]    = useState(null);
   const [hmisError,  setHmisError]  = useState(null);
   const [hmisLoading,setHmisLoading]= useState(false);
+
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
 
   const st       = kdStatus(indicator ?? {});
   const stColor  = S_COLOR[st];
@@ -609,58 +777,8 @@ export default function KDIndicatorDetail({ indicator, program, division, onBack
 
               <div className="dist-two-col">
 
-                {/* ── Sunburst ── */}
-                {(() => {
-                  const stateTotal = distData.reduce((s, d) => s + d.value, 0);
-                  const sunLabels  = ['Arunachal Pradesh', ...distData.map(d => d.district)];
-                  const sunParents = ['', ...distData.map(() => 'Arunachal Pradesh')];
-                  const sunValues  = [stateTotal, ...distData.map(d => d.value)];
-
-                  /* Categorical palette — 15 vivid colours, all dark enough for white text */
-                  const DIST_PALETTE = [
-                    '#7C3AED','#6D28D9','#B45309','#92400E','#BE185D',
-                    '#D97706','#F59E0B','#FB923C','#047857','#5B21B6',
-                    '#065F46','#C2410C','#9D174D','#D946EF','#92400E',
-                  ];
-                  const distColors = [
-                    '#0F172A',   /* root centre — deep navy */
-                    ...distData.map((_, i) => DIST_PALETTE[i % DIST_PALETTE.length]),
-                  ];
-
-                  const distTrace = {
-                    type: 'sunburst',
-                    labels: sunLabels,
-                    parents: sunParents,
-                    values: sunValues,
-                    branchvalues: 'total',
-                    marker: {
-                      colors: distColors,
-                      line: { color: '#ffffff', width: 2.5 },
-                    },
-                    hovertemplate: '<b>%{label}</b><br>%{value:,} · %{percentRoot:.1%} of state<extra></extra>',
-                    textinfo: 'label+percent root',
-                    textfont: { family: "'Inter', sans-serif", size: 13, color: '#ffffff' },
-                    insidetextorientation: 'auto',
-                    leaf: { opacity: 1 },
-                  };
-                  const distLayout = {
-                    paper_bgcolor: 'transparent',
-                    plot_bgcolor:  'transparent',
-                    margin: { t: 6, b: 6, l: 6, r: 6 },
-                    height: 400,
-                  };
-                  return (
-                    <div className="dist-chart-wrap">
-                      <Plot
-                        data={[distTrace]}
-                        layout={distLayout}
-                        config={{ displayModeBar: false, responsive: true }}
-                        style={{ width: '100%' }}
-                        useResizeHandler
-                      />
-                    </div>
-                  );
-                })()}
+                {/* ── District Map ── */}
+                <DistrictMap distData={distData} isLight={isLight} />
 
                 {/* ── Insight panel ── */}
                 {(() => {

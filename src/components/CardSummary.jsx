@@ -143,6 +143,23 @@ function _arc(cx, cy, r, s, e) {
   const p1 = _polar(cx, cy, r, s), p2 = _polar(cx, cy, r, e);
   return `M ${p1.x} ${p1.y} A ${r} ${r} 0 ${large} 1 ${p2.x} ${p2.y}`;
 }
+/* Half-circle arc (left→top→right, clockwise sweep=1 in SVG coords).
+   sFrac/eFrac = fractions 0..1 over the 180° arc.
+   gapDeg     = angular padding to leave at each end of the segment.
+   Angles: sFrac=0 → 9-o-clock (left), sFrac=1 → 3-o-clock (right), through 12-o-clock (top). */
+function _halfSeg(cx, cy, r, sFrac, eFrac, gapDeg) {
+  const toRad = d => d * Math.PI / 180;
+  // Map fraction → standard-math angle (0°=right, 90°=up, 180°=left).
+  // sFrac=0 → 180°, sFrac=1 → 0°, going counterclockwise in math = clockwise on screen.
+  const a1 = toRad(180 - sFrac * 180 - gapDeg);
+  const a2 = toRad(180 - eFrac * 180 + gapDeg);
+  // SVG: y increases downward, so y = cy - r*sin(angle) places top of circle at smaller y.
+  const x1 = cx + r * Math.cos(a1), y1 = cy - r * Math.sin(a1);
+  const x2 = cx + r * Math.cos(a2), y2 = cy - r * Math.sin(a2);
+  const span = (eFrac - sFrac) * 180 - 2 * gapDeg;
+  // sweep=1 draws the clockwise arc (left→top→right on screen).
+  return `M ${x1} ${y1} A ${r} ${r} 0 ${span > 180 ? 1 : 0} 1 ${x2} ${y2}`;
+}
 
 const SEG_LABELS = {
   gap:      'Critical',
@@ -162,53 +179,126 @@ const LAYOUT_BASE = {
   },
 };
 
-/* ── Programme speedometer gauge (half-circle arc) ─────────────── */
-function ProgGauge({ gap, close, achieved }) {
+/* ── Programme speedometer gauge ────────────────────────────────────
+   Visual: CSS conic-gradient (original clean look).
+   Interaction: click-angle math to detect which segment was clicked.
+   No new libraries needed.
+   ────────────────────────────────────────────────────────────────── */
+function ProgGauge({ gap, close, achieved, activeSeg, onSegClick }) {
   const total  = Math.max(1, gap + close + achieved);
-  const W = 160, RO = 80, RI = 54; // outer/inner radii → 26px track
+  const W = 160, RO = 80, RI = 54;
 
-  const gA = (gap   / total) * 180;
-  const cA = (close / total) * 180;
+  const gFrac = gap      / total;
+  const cFrac = close    / total;
+  const gA    = gFrac * 180;
+  const cA    = cFrac * 180;
 
+  /* All segments always full colour */
   const stops = [
-    gap      > 0 ? `#EF4444 0deg ${gA}deg`           : null,
-    close    > 0 ? `#EAB308 ${gA}deg ${gA + cA}deg`  : null,
-    achieved > 0 ? `#22C55E ${gA + cA}deg 180deg`    : null,
+    gap      > 0 ? `${SEG_COLORS.gap} 0deg ${gA}deg`              : null,
+    close    > 0 ? `${SEG_COLORS.close} ${gA}deg ${gA + cA}deg`   : null,
+    achieved > 0 ? `${SEG_COLORS.achieved} ${gA + cA}deg 180deg`  : null,
   ].filter(Boolean);
-  if (!stops.length) stops.push('rgba(255,255,255,0.12) 0deg 180deg');
+  if (!stops.length) stops.push('rgba(148,163,184,0.20) 0deg 180deg');
   stops.push('transparent 180deg');
 
-  // conic-gradient: center = bottom-center of div (= arc centre)
-  // "from 270deg" starts at 9 o'clock, sweeps clockwise through 12 o'clock to 3 o'clock
   const grad = `conic-gradient(from 270deg at 50% 100%, ${stops.join(', ')})`;
-  // radial-gradient mask punches out the inner hole
   const mask = `radial-gradient(circle at 50% 100%, transparent ${RI}px, black ${RI + 1}px)`;
+
+  /* Glow gradient — conic of ONLY the active segment, blurred behind the arc */
+  const glowGrad = activeSeg ? (() => {
+    const c = SEG_COLORS[activeSeg];
+    const from270 = 'from 270deg at 50% 100%';
+    if (activeSeg === 'gap')
+      return `conic-gradient(${from270}, ${c} 0deg ${gA}deg, transparent ${gA}deg 360deg)`;
+    if (activeSeg === 'close')
+      return `conic-gradient(${from270}, transparent 0deg ${gA}deg, ${c} ${gA}deg ${gA + cA}deg, transparent ${gA + cA}deg 360deg)`;
+    return `conic-gradient(${from270}, transparent 0deg ${gA + cA}deg, ${c} ${gA + cA}deg 180deg, transparent 180deg 360deg)`;
+  })() : null;
+
+  /* Click-angle detection — maps pointer position → segment key */
+  function handleArcClick(ev) {
+    ev.stopPropagation();
+    if (!onSegClick) return;
+    const rect = ev.currentTarget.getBoundingClientRect();
+    // Arc centre is at horizontal-centre, BOTTOM of the RO-height div
+    const acx = rect.left + rect.width  / 2;
+    const acy = rect.bottom;
+    const dx  = ev.clientX - acx;
+    const dy  = acy - ev.clientY;          // positive = above centre (in the arc)
+
+    // Only process clicks in the upper half (on the arc)
+    if (dy < -4) return;
+
+    // Reject clicks outside the ring band
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    if (dist < RI - 6 || dist > RO + 6) return;
+
+    // angle: 180° = left end, 90° = top, 0° = right end
+    const angleDeg = Math.atan2(dy, dx) * 180 / Math.PI;
+    const frac     = (180 - angleDeg) / 180;  // 0 = left, 1 = right
+    if (frac < 0 || frac > 1) return;
+
+    if      (frac <= gFrac)          onSegClick('gap');
+    else if (frac <= gFrac + cFrac)  onSegClick('close');
+    else                             onSegClick('achieved');
+  }
+
+  const displayCount = activeSeg
+    ? (activeSeg === 'gap' ? gap : activeSeg === 'close' ? close : achieved)
+    : total;
+  const lblColor = activeSeg ? SEG_COLORS[activeSeg] : 'var(--ink, #1e293b)';
 
   return (
     <div style={{ position: 'relative', width: W, height: RO + 14, flexShrink: 0 }}>
+      {/* Glow layer — blurred copy of active segment only, sits behind arc */}
+      {glowGrad && (
+        <div style={{
+          position: 'absolute', top: -6, left: -6, right: -6,
+          height: RO + 12,
+          borderRadius: `${RO}px ${RO}px 0 0`,
+          background: glowGrad,
+          maskImage: mask, WebkitMaskImage: mask,
+          filter: 'blur(10px)',
+          opacity: 0.55,
+          pointerEvents: 'none',
+          transition: 'opacity 0.2s',
+        }} />
+      )}
       {/* Grey track */}
       <div style={{
         position: 'absolute', top: 0,
         width: W, height: RO,
         borderRadius: `${RO}px ${RO}px 0 0`,
         overflow: 'hidden',
-        background: `conic-gradient(from 270deg at 50% 100%, rgba(255,255,255,0.09) 0deg 180deg, transparent 180deg)`,
+        background: `conic-gradient(from 270deg at 50% 100%, rgba(148,163,184,0.25) 0deg 180deg, transparent 180deg)`,
         maskImage: mask, WebkitMaskImage: mask,
       }} />
-      {/* Coloured arc */}
-      <div style={{
-        position: 'absolute', top: 0,
-        width: W, height: RO,
-        borderRadius: `${RO}px ${RO}px 0 0`,
-        overflow: 'hidden',
-        background: grad,
-        maskImage: mask, WebkitMaskImage: mask,
-        opacity: 0.88,
-      }} />
-      {/* KD count label */}
-      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, textAlign: 'center', lineHeight: 1.25 }}>
-        <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 15, fontWeight: 700, color: 'var(--ink, #1e293b)' }}>{total}</div>
-        <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 7.5, fontWeight: 600, color: 'var(--ink, #1e293b)', letterSpacing: '0.09em', textTransform: 'uppercase', opacity: 0.55 }}>Indicators</div>
+      {/* Coloured arc — click detection via angle math */}
+      <div
+        style={{
+          position: 'absolute', top: 0,
+          width: W, height: RO,
+          borderRadius: `${RO}px ${RO}px 0 0`,
+          overflow: 'hidden',
+          background: grad,
+          maskImage: mask, WebkitMaskImage: mask,
+          cursor: 'pointer',
+        }}
+        onClick={handleArcClick}
+      />
+      {/* Count + label */}
+      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0,
+                    textAlign: 'center', lineHeight: 1.25, pointerEvents: 'none' }}>
+        <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 15,
+                      fontWeight: 700, color: lblColor, transition: 'color 0.2s' }}>
+          {displayCount}
+        </div>
+        <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10,
+                      fontWeight: 700, color: lblColor, letterSpacing: '0.10em',
+                      textTransform: 'uppercase', transition: 'color 0.2s' }}>
+          {activeSeg ? SEG_LABELS[activeSeg] : 'Indicators'}
+        </div>
       </div>
     </div>
   );
@@ -217,6 +307,7 @@ function ProgGauge({ gap, close, achieved }) {
 /* ── component ──────────────────────────────────────────────────── */
 export default function CardSummary({ divisionId, programmes = [], activeFilter, isActive, onKDClick, onExploreDivision }) {
   const [selectedSeg, setSelectedSeg] = useState(null);
+  const [progActiveSegs, setProgActiveSegs] = useState({});
   const top3Ref = useRef(null);
   const indDonutRef = useRef(null);
   const totalNumRef = useRef(null);
@@ -251,10 +342,18 @@ export default function CardSummary({ divisionId, programmes = [], activeFilter,
   useEffect(() => {
     if (!isActive) {
       setSelectedSeg(null);
+      setProgActiveSegs({});
     } else {
       if (brk.gap > 0)        setSelectedSeg('gap');
       else if (brk.close > 0) setSelectedSeg('close');
       else                    setSelectedSeg('achieved');
+      // Initialise each prog card to its dominant segment
+      const init = {};
+      programmes.forEach(prog => {
+        const pb = getProgKDBrk(divisionId, prog.id);
+        init[prog.id] = pb.gap > 0 ? 'gap' : pb.close > 0 ? 'close' : 'achieved';
+      });
+      setProgActiveSegs(init);
     }
   }, [isActive, brk.gap, brk.close, brk.achieved]);
 
@@ -515,14 +614,12 @@ export default function CardSummary({ divisionId, programmes = [], activeFilter,
             const closes = getProgKDsByStatus(divisionId, prog.id, 'close');
             const achs   = getProgKDsByStatus(divisionId, prog.id, 'achieved');
             const domSeg = gaps.length > 0 ? 'gap' : closes.length > 0 ? 'close' : 'achieved';
+            const activePSeg = progActiveSegs[prog.id] ?? domSeg;
             const headerText =
-              domSeg === 'gap'      ? 'TOP CRITICAL' :
-              domSeg === 'close'    ? 'TOP CAUTION'  : 'TOP ON TRACK';
-            const pool = [
-              ...gaps.map(kd   => ({ kd, seg: 'gap'      })),
-              ...closes.map(kd => ({ kd, seg: 'close'    })),
-              ...achs.map(kd   => ({ kd, seg: 'achieved' })),
-            ].slice(0, 2);
+              activePSeg === 'gap'      ? 'TOP CRITICAL' :
+              activePSeg === 'close'    ? 'TOP CAUTION'  : 'TOP ON TRACK';
+            const segPool = activePSeg === 'gap' ? gaps : activePSeg === 'close' ? closes : achs;
+            const pool = segPool.slice(0, 2).map(kd => ({ kd, seg: activePSeg }));
 
             return (
               <div
@@ -540,20 +637,21 @@ export default function CardSummary({ divisionId, programmes = [], activeFilter,
                 {/* Speedometer gauge */}
                 <div
                   ref={el => { progDonutRefs.current[i] = el; }}
-                  style={{
-                    flexShrink: 0,
-                    alignSelf: 'center',
-                    marginTop: 10,
-                    filter: `drop-shadow(0 0 10px ${SEG_GLOW[glowSeg]}0.28)) drop-shadow(0 0 4px ${SEG_GLOW[glowSeg]}0.18))`,
-                  }}
+                  style={{ flexShrink: 0, alignSelf: 'center', marginTop: 10 }}
                 >
-                  <ProgGauge gap={pb.gap} close={pb.close} achieved={pb.achieved} />
+                  <ProgGauge
+                    gap={pb.gap}
+                    close={pb.close}
+                    achieved={pb.achieved}
+                    activeSeg={activePSeg}
+                    onSegClick={seg => setProgActiveSegs(prev => ({ ...prev, [prog.id]: seg }))}
+                  />
                 </div>
 
                 {/* Top indicators */}
                 {pool.length > 0 && (
                   <div className="lnd-pc-ind-list">
-                    <div className="lnd-pc-ind-header" style={{ color: SEG_COLORS[domSeg] }}>
+                    <div className="lnd-pc-ind-header" style={{ color: SEG_COLORS[activePSeg] }}>
                       {headerText}
                     </div>
                     {pool.map(({ kd }, j) => (
