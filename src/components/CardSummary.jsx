@@ -162,6 +162,58 @@ const LAYOUT_BASE = {
   },
 };
 
+/* ── Programme speedometer gauge (half-circle arc) ─────────────── */
+function ProgGauge({ gap, close, achieved }) {
+  const total  = Math.max(1, gap + close + achieved);
+  const W = 110, RO = 55, RI = 37; // outer/inner radii → 18px track
+
+  const gA = (gap   / total) * 180;
+  const cA = (close / total) * 180;
+
+  const stops = [
+    gap      > 0 ? `#EF4444 0deg ${gA}deg`           : null,
+    close    > 0 ? `#EAB308 ${gA}deg ${gA + cA}deg`  : null,
+    achieved > 0 ? `#22C55E ${gA + cA}deg 180deg`    : null,
+  ].filter(Boolean);
+  if (!stops.length) stops.push('rgba(255,255,255,0.12) 0deg 180deg');
+  stops.push('transparent 180deg');
+
+  // conic-gradient: center = bottom-center of div (= arc centre)
+  // "from 270deg" starts at 9 o'clock, sweeps clockwise through 12 o'clock to 3 o'clock
+  const grad = `conic-gradient(from 270deg at 50% 100%, ${stops.join(', ')})`;
+  // radial-gradient mask punches out the inner hole
+  const mask = `radial-gradient(circle at 50% 100%, transparent ${RI}px, black ${RI + 1}px)`;
+
+  return (
+    <div style={{ position: 'relative', width: W, height: RO + 14, flexShrink: 0 }}>
+      {/* Grey track */}
+      <div style={{
+        position: 'absolute', top: 0,
+        width: W, height: RO,
+        borderRadius: `${RO}px ${RO}px 0 0`,
+        overflow: 'hidden',
+        background: `conic-gradient(from 270deg at 50% 100%, rgba(255,255,255,0.09) 0deg 180deg, transparent 180deg)`,
+        maskImage: mask, WebkitMaskImage: mask,
+      }} />
+      {/* Coloured arc */}
+      <div style={{
+        position: 'absolute', top: 0,
+        width: W, height: RO,
+        borderRadius: `${RO}px ${RO}px 0 0`,
+        overflow: 'hidden',
+        background: grad,
+        maskImage: mask, WebkitMaskImage: mask,
+        opacity: 0.88,
+      }} />
+      {/* KD count label */}
+      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, textAlign: 'center', lineHeight: 1.25 }}>
+        <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 15, fontWeight: 700, color: 'var(--ink, #1e293b)' }}>{total}</div>
+        <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 7.5, fontWeight: 600, color: 'var(--ink-faint, #94a3b8)', letterSpacing: '0.09em', textTransform: 'uppercase' }}>KDs</div>
+      </div>
+    </div>
+  );
+}
+
 /* ── component ──────────────────────────────────────────────────── */
 export default function CardSummary({ divisionId, programmes = [], activeFilter, isActive, onKDClick, onExploreDivision }) {
   const [selectedSeg, setSelectedSeg] = useState(null);
@@ -457,31 +509,6 @@ export default function CardSummary({ divisionId, programmes = [], activeFilter,
             const sc         = SEG_COLORS[progStatus === 'red' ? 'gap' : progStatus === 'yellow' ? 'close' : 'achieved'];
             const glowSeg    = pb.gap > 0 ? 'gap' : pb.close > 0 ? 'close' : 'achieved';
 
-            /* Build hover text per segment — list of KD indicator names */
-            const hoverText = ['gap', 'close', 'achieved'].map(seg => {
-              const kds = getProgKDsByStatus(divisionId, prog.id, seg);
-              if (!kds.length) return 'None';
-              return kds.map(k => `• ${k.indicator}`).join('<br>');
-            });
-
-            const progTrace = [{
-              type: 'pie',
-              hole: 0.62,
-              values: [Math.max(0.01, pb.gap), Math.max(0.01, pb.close), Math.max(0.01, pb.achieved)],
-              labels: ['Critical', 'Caution', 'On Track'],
-              customdata: hoverText,
-              hovertemplate: '<b>%{label}: %{value} KDs</b><br>%{customdata}<extra></extra>',
-              marker: {
-                colors: [SEG_COLORS.gap, SEG_COLORS.close, SEG_COLORS.achieved],
-                line: { color: [SEG_COLORS.gap, SEG_COLORS.close, SEG_COLORS.achieved], width: 2 },
-              },
-              textinfo: 'none',
-              sort: false,
-              direction: 'clockwise',
-              rotation: -90,
-            }];
-
-            const progLayout = { ...LAYOUT_BASE, width: 120, height: 120 };
             const totalKDs = pb.gap + pb.close + pb.achieved;
 
             return (
@@ -494,24 +521,15 @@ export default function CardSummary({ divisionId, programmes = [], activeFilter,
                   if (worstKD && onKDClick) onKDClick(worstKD, prog.id);
                 }}
               >
-                {/* Donut with hover */}
+                {/* Speedometer gauge */}
                 <div
                   ref={el => { progDonutRefs.current[i] = el; }}
                   style={{
-                    position: 'relative', width: 120, height: 120, flexShrink: 0,
-                    filter: `drop-shadow(0 0 8px ${SEG_GLOW[glowSeg]}0.22)) drop-shadow(0 0 3px ${SEG_GLOW[glowSeg]}0.32))`,
+                    flexShrink: 0,
+                    filter: `drop-shadow(0 0 10px ${SEG_GLOW[glowSeg]}0.28)) drop-shadow(0 0 4px ${SEG_GLOW[glowSeg]}0.18))`,
                   }}
                 >
-                  <Plot
-                    data={progTrace}
-                    layout={progLayout}
-                    config={{ displayModeBar: false, responsive: false }}
-                  />
-                  {/* Center label */}
-                  <div className="lnd-prog-donut-center">
-                    <span style={{ fontSize: 16, fontWeight: 700, color: '#fff' }}>{totalKDs}</span>
-                    <span className="lnd-prog-dc-lbl">KDs</span>
-                  </div>
+                  <ProgGauge gap={pb.gap} close={pb.close} achieved={pb.achieved} />
                 </div>
 
                 {/* Programme name */}
