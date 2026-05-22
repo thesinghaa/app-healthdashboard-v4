@@ -1257,9 +1257,11 @@
 }
 /* Programme name */
 .lnd-pc-name {
-  font-family: 'Inter', sans-serif;
-  font-size: 13px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
   font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
   color: #ffffff;
   margin: 0;
   line-height: 1.25;
