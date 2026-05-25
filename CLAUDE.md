@@ -63,17 +63,43 @@ A React + Vite **health dashboard** tracking NHM Arunachal Pradesh programme per
 **Complete redesign** of `LandingPage.jsx` + `landing-v4.css`. Old cinema-reel layout fully replaced.
 
 ### Layout (scrollable story)
-1. **Hero** — full-viewport dark panel, giant animated health score (%), KPI status strip, scroll cue
-2. **Map** — AP choropleth (react-simple-maps) + district ranking sidebar
-3. **Division Cards** — 5-column grid, each card has progress ring, KD breakdown, mini KD bars
-4. **Critical Alerts** — table of top gap KDs across all divisions
-5. **NFHS Progress** — recharts BarChart (layout="vertical") comparing NFHS-4 vs NFHS-5
-6. **Wins Callouts** — 3 highlight cards for big improvements
-7. **Footer** — nav links
+1. **Hero strip** — KPI bar (On Track / Caution / Critical Gap / Overall %) + brand
+2. **Programme Overview** (`ProgrammeOverview.jsx`) — ICED-style interactive 5-zone layout (see below)
+3. **NHM Programme Flow** — @nivo/sankey (NHM → Divisions → Programmes → Status), animated, clickable
+4. **Critical Alerts** — table of top-8 gap KDs ranked by deficit magnitude
+
+### ProgrammeOverview component (`src/components/ProgrammeOverview.jsx`) — added May 2026
+
+ICED-style interactive section. 5 horizontal zone columns, each representing an NHM division.
+
+**Hover behaviour:**
+- Hovered zone stays full opacity; all others dim to `opacity: 0.12`
+- Floating stat pills appear below the label box: Total KDs · On Track % · Critical count
+- Bar chart panel slides up from bottom of zone (CSS `translateY(100%) → 0`, 0.38s ease)
+- Bar chart shows On Track / Caution / Critical / Not Mapped counts with animated fill widths
+
+**Icons:** 3 filled colorful SVG icons per division, hardcoded in `ICONS` constant:
+- RCH (blue): pregnant mother+child, baby with smile, vaccination syringe
+- NDCP (amber): lungs/TB, mosquito/malaria, medicine capsule
+- NCD (purple): heart ECG, glucometer, eye
+- HSS (teal): hospital building, capsule pills, ambulance
+- HRH (red): doctor in coat, medical team, training clipboard
+
+**Icon positions** (`ICON_LAYOUTS`): top-left `{top:16, left:12, size:72}`, top-right `{top:14, right:12, size:62}`, mid-left `{top:188, left:18, size:66}`
+
+**CSS namespace:** `.pov-*` (appended at bottom of `landing-v4.css`)
+- Zone grid: `.pov-zones` (5-col, height:520px)
+- Active state: `.pov-has-active` on grid, `.pov-zone--active` on zone
+- Label box: `.pov-div-box` — bordered, fills with division color on hover
+- Stats: `.pov-stats-row`, `.pov-stat`, `.pov-stat-val`, `.pov-stat-lbl`
+- Chart: `.pov-chart`, `.pov-bar-row`, `.pov-bar-fill` (animates via `--bar-w` CSS var)
+- KPI cards: `.pov-card`, `.pov-card-bar`, `.pov-card-foot`
+
+**Click** → `onSelectDivision(div)` → navigates to DivisionPage.
 
 ### CSS file: `src/styles/landing-v4.css`
-- Class namespace: `.v4c-*` (avoids conflicts with old `.v4b-*` / `.lnd-*`)
-- Token system: `--v4-hero: #030810`, `--v4-bg: #060d19`, `--v4-s1: #0a1525`, `--v4-s2: #0f1d30`
+- Old `.v4c-*` namespace (cinema reel legacy) still present but no longer rendered
+- Active namespaces: `.v4l-*` (landing wrapper, hero, flow/Sankey, alerts) + `.pov-*` (overview zones)
 - Status colors: `--v4-gap: #FF3B5C`, `--v4-close: #FFB020`, `--v4-ok: #00C97A`
 - Division colors: `--v4-rch: #4F8EF7`, `--v4-ndcp: #F7B23B`, `--v4-ncd: #9B6FEB`, `--v4-hss: #2DD4BF`, `--v4-hrh: #F7614F`
 - `.v4c-root { height: 100%; overflow-y: auto }` — scrollable within `.flip-page`
@@ -137,8 +163,10 @@ State lives in `App.jsx`:
 | File | Purpose |
 |------|---------|
 | `src/App.jsx` | Root router — state-based navigation |
-| `src/pages/LandingPage.jsx` | Entry page — cinema reel carousel of 5 divisions |
-| `src/styles/landing.css` | Landing page styles — glass nav, reel cards, dot nav |
+| `src/pages/LandingPage.jsx` | Entry page — hero strip + Programme Overview + Sankey + Alerts |
+| `src/components/ProgrammeOverview.jsx` | ICED-style interactive 5-zone section (hover → dim + bar chart) |
+| `src/styles/landing-v4.css` | Landing v4 styles — `.v4l-*` + `.pov-*` namespaces |
+| `src/styles/landing.css` | Old cinema-reel styles (legacy, not active) |
 | `src/pages/HomePage.jsx` | Summary page — all 5 division columns at once (was landing) |
 | `src/pages/DivisionPage.jsx` | 2nd layer: division programme grid |
 | `src/pages/KDProgrammePage.jsx` | 3rd layer: programme-level KD table |
