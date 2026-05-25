@@ -219,7 +219,7 @@ export default function NHMSankey({ onSelectDivision, onSelectProgramme, theme =
       {visible && (
         <ResponsiveSankey
           data={{ nodes, links }}
-          margin={{ top: 32, right: 200, bottom: 32, left: 100 }}
+          margin={{ top: 32, right: 155, bottom: 32, left: 65 }}
           align="justify"
           sort="input"
           nodeOpacity={1}

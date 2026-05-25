@@ -1379,9 +1379,10 @@
   color: #475569;
 }
 .v4l-sankey-outer {
-  max-width: 1400px;
+  max-width: 1600px;
+  width: 100%;
   margin: 0 auto;
-  padding: 0 40px;
+  padding: 0 24px;
 }
 /* The actual Sankey wrap rendered by NHMSankey */
 .nhm-sankey-wrap {
