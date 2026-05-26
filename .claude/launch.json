@@ -4,8 +4,14 @@
     {
       "name": "pif-v4",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev", "--", "--port", "3002"],
+      "runtimeArgs": ["run", "dev"],
       "port": 3002
+    },
+    {
+      "name": "pif-v4-prod",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["vite", "preview", "--port", "4173"],
+      "port": 4173
     }
   ]
 }
