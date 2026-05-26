@@ -254,7 +254,9 @@ export default function LandingPage({ onSelectDivision, onViewSummary, onDirectK
         <div className="v4l-nav-inner">
           <div className="v4l-brand">
             <img src="/ap-emblem.svg" alt="Arunachal Pradesh Emblem" className="v4l-brand-logo" />
-            <div className="v4l-brand-name">Arunachal Pradesh</div>
+            <div className="v4l-brand-divider" />
+            <img src="/nhm-logo.png" alt="NHM" className="v4l-brand-nhm" />
+            <div className="v4l-brand-name">Arunachal Pradesh eHealth Unified Dashboard</div>
           </div>
           <nav className="v4l-nav-links">
             <button className="v4l-nav-btn" onClick={onViewSummary}>All Programmes</button>
