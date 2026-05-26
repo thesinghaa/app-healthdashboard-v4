@@ -11,6 +11,13 @@ import { KD_TREE } from '../data/kdData';
 import geoData from '../data/apDistricts.json';
 
 /* ── helpers ──────────────────────────────────────────────────────────────── */
+function hexToRgb(hex) {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `${r}, ${g}, ${b}`;
+}
+
 function kdStatus(kd) {
   if (kd.achievement == null || kd.target == null || kd.target === 0) return 'neutral';
   const r = kd.achievement / kd.target;
@@ -296,7 +303,7 @@ export default function DivisionAccordion({ onSelectDivision, totalKDs = 0 }) {
                 '--bdark': clr.dark,
                 '--bmid':  clr.mid,
                 '--blight': clr.light,
-                background: `linear-gradient(175deg, ${clr.dark} 0%, ${clr.main} 55%, ${clr.mid} 100%)`,
+                '--brgb':  hexToRgb(clr.main),
               }}
               onClick={!isActive ? () => setActiveId(div.id) : undefined}
             >

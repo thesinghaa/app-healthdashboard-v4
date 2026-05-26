@@ -1892,11 +1892,18 @@
    ═══════════════════════════════════════════════════════════════════════════ */
 
 .dacc-wrap {
-  background: #fff;
-  background-image: radial-gradient(circle, rgba(15,23,42,0.065) 1px, transparent 1px);
+  background: #0A0F1C;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.045) 1px, transparent 1px);
   background-size: 28px 28px;
   padding: 64px 0 56px;
 }
+.dacc-wrap .v4l-section-tag {
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.65);
+  border-color: rgba(255,255,255,0.15);
+}
+.dacc-wrap .v4l-section-title { color: #EEF2FF; }
+.dacc-wrap .v4l-section-sub   { color: rgba(255,255,255,0.45); }
 
 /* ── Bar track ──────────────────────────────────────────────────────────── */
 .dacc-track {
@@ -1918,18 +1925,31 @@
   overflow: hidden;
   position: relative;
   cursor: pointer;
+  background: rgba(var(--brgb), 0.14);
+  backdrop-filter: blur(22px) saturate(1.5);
+  -webkit-backdrop-filter: blur(22px) saturate(1.5);
+  border: 1px solid rgba(var(--brgb), 0.38);
+  box-shadow: 0 4px 24px rgba(var(--brgb), 0.22),
+              inset 0 1px 0 rgba(255,255,255,0.10);
   transition: flex-grow 0.52s cubic-bezier(0.4, 0, 0.2, 1),
               border-radius 0.52s ease,
-              box-shadow 0.3s ease;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.12), 0 1px 6px rgba(0,0,0,0.08);
+              background 0.3s ease,
+              box-shadow 0.3s ease,
+              border-color 0.3s ease;
 }
 .dacc-bar:hover:not(.dacc-bar--active) {
-  box-shadow: 0 8px 36px rgba(0,0,0,0.20), 0 2px 8px rgba(0,0,0,0.10);
+  background: rgba(var(--brgb), 0.22);
+  border-color: rgba(var(--brgb), 0.55);
+  box-shadow: 0 8px 36px rgba(var(--brgb), 0.32),
+              inset 0 1px 0 rgba(255,255,255,0.14);
 }
 .dacc-bar--active {
   flex-grow: 5.2;
   cursor: default;
-  box-shadow: 0 12px 48px rgba(0,0,0,0.22), 0 4px 16px rgba(0,0,0,0.12);
+  background: rgba(var(--brgb), 0.20);
+  border-color: rgba(var(--brgb), 0.55);
+  box-shadow: 0 12px 48px rgba(var(--brgb), 0.36),
+              inset 0 1px 0 rgba(255,255,255,0.12);
 }
 .dacc-bar--compressed {
   flex-grow: 0.45;
@@ -2079,13 +2099,13 @@
   gap: 8px;
 }
 .dacc-exp-stat {
-  background: rgba(255,255,255,0.14);
+  background: rgba(var(--brgb), 0.22);
   border-radius: 12px;
   padding: 12px 14px 10px;
   display: flex;
   flex-direction: column;
   gap: 4px;
-  border: 1px solid rgba(255,255,255,0.15);
+  border: 1px solid rgba(var(--brgb), 0.40);
 }
 .dacc-stat--crit .dacc-exp-stat-num { color: #FCA5A5; }
 .dacc-exp-stat-num {
@@ -2160,8 +2180,8 @@
   font-size: 9.5px;
   font-weight: 600;
   color: white;
-  background: rgba(255,255,255,0.15);
-  border: 1px solid rgba(255,255,255,0.22);
+  background: rgba(var(--brgb), 0.24);
+  border: 1px solid rgba(var(--brgb), 0.42);
   border-radius: 20px;
   padding: 3px 9px;
   white-space: nowrap;
@@ -2211,9 +2231,9 @@
 .dacc-exp-map-wrap {
   flex: 1;
   min-height: 0;
-  background: rgba(255,255,255,0.08);
+  background: rgba(var(--brgb), 0.12);
   border-radius: 14px;
-  border: 1px solid rgba(255,255,255,0.14);
+  border: 1px solid rgba(var(--brgb), 0.30);
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -2229,7 +2249,7 @@
 
 /* ── Dark mode overrides ────────────────────────────────────────────────── */
 [data-theme="dark"] .dacc-wrap {
-  background: #060d19;
-  background-image: radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px);
+  background: #060A12;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.035) 1px, transparent 1px);
   background-size: 28px 28px;
 }
